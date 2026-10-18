@@ -3985,7 +3985,7 @@ function syllabusMajorEntries(subject,majors){const entries=[...majors.entries()
  if(query){root.innerHTML='<div class="syllabus-direct-results">'+entries.map(entry=>renderSyllabusCourseCard(entry,query,true,false)).join('')+'</div>';return}
  const subjectOrder=['Psychology','Philosophy','Economics','English','History','Politics','SEC','OE','Common Subjects','Other Subjects'];
  root.innerHTML=[...subjectsMap.entries()].sort(([a],[b])=>{const ai=subjectOrder.indexOf(a),bi=subjectOrder.indexOf(b);return(ai<0?999:ai)-(bi<0?999:bi)}).map(([subject,majors])=>'<details class="syllabus-subject-group"><summary><span>'+esc(({SEC:'SEC (Skill Enhancement Course)',OE:'OE (Open Elective)'})[subject]||subject)+'</span><small>'+majors.size+' '+(majors.size===1?'group':'groups')+'</small></summary><div class="syllabus-major-list">'+(subject==='Other Subjects'?renderOtherSubjects(majors):syllabusMajorEntries(subject,majors).map(([major,courses])=>'<details class="syllabus-major-group"><summary><span>'+esc(major)+'</span></summary><div class="syllabus-course-list">'+courses.map(renderCourse).join('')+'</div></details>').join(''))+'</div></details>').join('');
-}function openSyllabusPage(){renderSyllabusPage();const page=document.getElementById('syllabusPage');page.hidden=false;page.classList.add('open');enterAppPage('syllabus')}function hideSyllabusPage(){const page=document.getElementById('syllabusPage');page.classList.remove('open');page.hidden=true;document.getElementById('syllabusPageSearch').value=''}function closeSyllabusPage(){closeAppPage('syllabus')}document.getElementById('openSyllabusPage').addEventListener('click',openSyllabusPage);document.getElementById('openSyllabusPage').addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openSyllabusPage()}});document.getElementById('closeSyllabusPage').addEventListener('click',closeSyllabusPage);document.getElementById('syllabusPageSearch').addEventListener('input',renderSyllabusPage);const oeNoteResources={electronics:{type:'Study Notes',title:'Electronics (OE) Unit 1 - Electric Geyser',fileName:'Electronics (OE) Unit 1 - Electric Geyser.pdf',driveUrl:'https://drive.google.com/file/d/1CXt80moj_k7TK9s8vYPseN9aYhlCxwoP/preview'},electronicsUnit2:{type:'Study Notes',title:'Electronics (OE) Unit 2 - Induction Cooker',fileName:'Electronics (OE) Unit 2 - Induction Cooker.pdf',driveUrl:'https://drive.google.com/file/d/1sRaf9T_SfwKf_RZWTcGUXlzHBFAHMusI/preview'},electronicsUnit3:{type:'Study Notes',title:'Electronics (OE) Unit 3 - Microwave Oven',fileName:'Electronics (OE) Unit 3 - Microwave Oven.pdf',driveUrl:'https://drive.google.com/file/d/1j151WrR53V6C55BqeFpMj79_DKWuX-5t/preview'},geology:{type:'Study Notes',title:'Geology (OE) Notes',fileName:'Geology (OE) Notes.pdf',driveUrl:'https://drive.google.com/file/d/1e6GByJHv0XlY3eIa-h92A5m_aliIIYQx/preview'},zoology:{type:'Study Notes',title:'Zoology (OE) Notes',fileName:'Zoology (OE) Notes.pdf',driveUrl:'https://drive.google.com/file/d/1FDqHs74tCn-17puO-mXUnkg1Y8_Cmile/preview'},aec:{type:'Study Notes',title:'AEC Communication Notes',fileName:'AEC - Communication Notes.pdf',driveUrl:'https://drive.google.com/file/d/1ygp4eDodfcgQN78MZZ4tVdvvKPZAIN0q/preview'}};function openCategorySubject(parentName,cardName){const all=[...subjects.flatMap(subject=>(subject.resources||[]).filter(resource=>resource.type==='Syllabus').map(resource=>({subject:subject.name,resource}))),...additionalSyllabi].filter(({resource})=>!/(?:semester\s*(?:ii|2)\b)/i.test((resource.title||'')+' '+(resource.extracted?.course||''))).map(entry=>({...entry,sourceSubject:entry.subject,...syllabusGrouping(entry.subject,entry.resource)})),titleOf=entry=>(entry.resource.title||'')+' '+(entry.resource.extracted?.course||''),unique=items=>items.filter((entry,index,list)=>list.findIndex(candidate=>(candidate.resource.title||'').trim().toLowerCase()===(entry.resource.title||'').trim().toLowerCase())===index);let entries=[];if(parentName==='SEC')entries=unique(all.filter(entry=>cardName==='SEC Psychology'?/Health Promoting Behaviours/i.test(titleOf(entry)):cardName==='SEC Economics'?/Socio-Economic Survey/i.test(titleOf(entry)):cardName==='SEC English'?/Soft Skills/i.test(titleOf(entry)):/Citizenship|Governance/i.test(titleOf(entry))));else if(parentName==='OE'){const filters={'OE Electronics':/Electronics|Domestic Equipment Maintenance/i,'OE Botany':/Botany|Landscaping & Gardening/i,'OE Geography':entry=>/Geography|GEOOE/i.test(titleOf(entry))&&/Open Elective|OE|GEOOE/i.test(titleOf(entry)),'OE Zoology':/Zoology|Food,? Nutrition and Health/i};const filter=filters[cardName];entries=unique(all.filter(entry=>typeof filter==='function'?filter(entry):filter?.test(titleOf(entry))))}else if(parentName==='Common Subjects'){if(cardName==='AEC')entries=unique(all.filter(entry=>/AEC/i.test(titleOf(entry))&&/Semester I/i.test(entry.resource.extracted?.course||'')))}else if(parentName==='Other Subjects'){entries=(cardName==='French'||cardName==='French Major 1')?unique(all.filter(entry=>entry.sourceSubject==='French')):unique(all.filter(entry=>entry.sourceSubject==='Geography'&&(cardName==='Geography'||(cardName==='Major 1'?/Major 1|Introduction to Physical Geography/i.test(titleOf(entry)):/Major 2|Cartography|Practicals in Elementary Cartography/i.test(titleOf(entry))))))}const noteKeys=parentName==='OE'?({'OE Electronics':['electronics','electronicsUnit2','electronicsUnit3'],'OE Geology':['geology'],'OE Zoology':['zoology']}[cardName]||[]):parentName==='Common Subjects'&&cardName==='AEC'?['aec']:[],categoryId=({SEC:{"SEC Psychology":"sec-psychology","SEC Economics":"sec-economics","SEC English":"sec-english","SEC Politics":"sec-politics"},OE:{"OE Botany":"oe-botany","OE Geography":"oe-geography","OE Electronics":"oe-electronics","OE Geology":"oe-geology","OE Zoology":"oe-zoology"},"Common Subjects":{AEC:"common-aec",VEC:"common-vec",IKS:"common-iks"},"Other Subjects":{Geography:"other-geography",French:"other-french","French Major 1":"other-french","Major 1":"other-major-1","Major 2":"other-major-2"}})[parentName]?.[cardName]||"",parentId=({SEC:"sec",OE:"oe","Common Subjects":"common","Other Subjects":"other"})[parentName],categoryResources=categoryId?(subjects.find(subject=>subject.id===parentId)?.resources||[]).filter(resource=>resource.category===categoryId):[],resources=entries.map(entry=>entry.resource).concat(noteKeys.map(key=>oeNoteResources[key]),categoryResources),categorySyllabus=entries.map(entry=>({...entry,major:entry.major||cardName})).concat(categoryResources.filter(resource=>resource.type==="Syllabus").map(resource=>({resource,subject:parentName,sourceSubject:parentName,major:resource.major||cardName,course:resource.title}))),pageSubject={id:'category-'+parentName.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+cardName.toLowerCase().replace(/[^a-z0-9]+/g,'-'),name:cardName,desc:({ 'SEC Psychology':'Health Promoting Behaviours','SEC Economics':'Socio-Economic Survey','SEC English':'Soft Skills','SEC Politics':'Citizenship and Governance','OE Botany':'Landscaping & Gardening','OE Geography':'Basic Concepts in Geography - I','OE Electronics':'Electronics (OE) study notes','OE Geology':'Geology (OE) study notes','OE Zoology':'Food, Nutrition and Health',AEC:'Communication Skills in English',VEC:'Value Education',IKS:'Indian Knowledge System','Major 1':'Introduction to Physical Geography','Major 2':'Practicals in Elementary Cartography',Geography:'Major 1 and Major 2 · Geography'})[cardName]||parentName+' subject',resources,categorySubject:true,categorySyllabus};if(appPageStack.at(-1)?.type==='category'){const categoryEntry=appPageStack.pop();hideCategoryPage();syncAppPageState();if(categoryEntry.historyEntry){try{history.replaceState({appPage:'home'},'')}catch{}}}openSubject(pageSubject,'All')}function openCategoryPage(subject,focusCard=''){const page=document.getElementById('categoryPage'),titles={sec:'SEC',oe:'OE',common:'Common Subjects',other:'Other Subjects'},descriptions={sec:'SEC · choose a subject',oe:'OE · choose a subject',common:'AEC · VEC · IKS',other:'Geography · French'},commonTitles={AEC:'AEC · Communication Skills in English',VEC:'VEC · Value Education',IKS:'IKS · Course resources'},commonDescriptions={AEC:'Common Subject · Ability Enhancement Course',VEC:'Common Subject · Value Education Course',IKS:'Common Subject · Indian Knowledge System'};document.getElementById('categoryPageTitle').textContent=commonTitles[focusCard]||titles[subject.id]||subject.name;document.getElementById('categoryPageDescription').textContent=commonDescriptions[focusCard]||descriptions[subject.id]||'Browse subjects in this collection.';document.getElementById('categoryPageContent').innerHTML=renderSubjectSyllabus(subject.name,focusCard);page.querySelectorAll('.category-subject-card').forEach(card=>{const summary=card.querySelector('summary'),name=summary?.dataset.subjectName||card.querySelector('.category-subject-copy strong')?.textContent?.trim();if(summary&&name)summary.addEventListener('click',event=>{event.preventDefault();openCategorySubject(subject.name,name)})});page.querySelectorAll('[data-open-oe-note]').forEach(button=>button.addEventListener('click',event=>{event.stopPropagation();const resource=oeNoteResources[button.dataset.openOeNote];if(resource)openResource(resource)}));page.hidden=false;page.classList.add('open');enterAppPage('category',subject.id)}function hideCategoryPage(){const page=document.getElementById('categoryPage');page.classList.remove('open');page.hidden=true;document.getElementById('categoryPageContent').replaceChildren()}function closeCategoryPage(){closeAppPage('category')}document.getElementById('closeCategoryPage').addEventListener('click',closeCategoryPage);function openVideoPage(){const page=document.getElementById('videoPage');page.hidden=false;page.classList.add('open');window.setTimeout(()=>{if(!page.hidden)renderVideoLibrary()},60);document.querySelectorAll('.navitem').forEach(item=>{const active=item.dataset.nav==='videos';item.classList.toggle('active',active);if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current')});enterAppPage('videos')}function hideVideoPage(){const page=document.getElementById('videoPage');page.classList.remove('open');page.hidden=true;document.getElementById('videoPageSearch').value='';document.querySelectorAll('.navitem').forEach(item=>{const active=item.dataset.nav==='home';item.classList.toggle('active',active);if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current')})}function closeVideoPage(){closeAppPage('videos')}document.getElementById('openVideosPage').addEventListener('click',openVideoPage);document.getElementById('openVideosPage').addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openVideoPage()}});document.getElementById('closeVideoPage').addEventListener('click',closeVideoPage);document.getElementById('videoPageSearch').addEventListener('input',renderVideoPage);document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.getElementById('videoPage').hidden)closeVideoPage();if(event.key==='Escape'&&!document.getElementById('syllabusPage').hidden)closeSyllabusPage()});function renderCategorySubjectSyllabus(subject){const entries=subject.categorySyllabus||[];if(!entries.length)return'<div class="syllabus-page-empty">No syllabus documents have been added yet.</div>';const majors=new Map();entries.forEach(entry=>{const major=entry.major||subject.name;if(!majors.has(major))majors.set(major,[]);majors.get(major).push(entry)});return'<details class="syllabus-subject-group"><summary><span>'+esc(subject.name)+'</span><small>'+majors.size+' '+(majors.size===1?'group':'groups')+'</small></summary><div class="syllabus-major-list">'+syllabusMajorEntries(subject.name,majors).map(([major,courses])=>'<details class="syllabus-major-group"><summary><span>'+esc(major)+'</span></summary><div class="syllabus-course-list">'+courses.map(entry=>renderSyllabusCourseCard(entry)).join('')+'</div></details>').join('')+'</div></details>'} function renderSuppliedPanel(){const resources=selected.resources||[],types={'books':['Textbooks','Books'],'syllabus':['Syllabus'],'short-notes':['Study Notes','Short Notes'],'question-bank':['Question Banks','Question Bank'],'answer-key':['Answer Keys','Answer Key'],'videos':['Videos','Video Lectures']},typesForTab=types[activeTab]||[],items=activeTab==='videos'?subjectVideoResources(selected):resources.filter(r=>typesForTab.includes(r.type)),videoCard=(r,index)=>`<article class="resource supplied-resource video-resource" data-open-video="${index}" role="button" tabindex="0" aria-label="Watch ${esc(r.title||'Video lecture')}"><div class="video-resource-preview" aria-hidden="true"><img src="${videoThumbnail(r)}" alt=""></div><div class="res-info"><strong>${esc(r.title||'Video lecture')}</strong><span class="video-resource-channel">${esc(r.channel||'YouTube')}</span></div><div class="resource-actions"><span class="action" aria-hidden="true">Watch</span></div></article>`;let content='';if(activeTab==='videos'){if(items.some(r=>r.major)){const majors=[];items.forEach((resource,index)=>{const majorName=resource.major||'Other Videos',unitName=resource.unit||'Lessons';let major=majors.find(group=>group.name===majorName);if(!major){major={name:majorName,units:[]};majors.push(major)}let unit=major.units.find(group=>group.name===unitName);if(!unit){unit={name:unitName,items:[]};major.units.push(unit)}unit.items.push({resource,index})});content=majors.map(major=>`<section class="history-video-major"><h3>${esc(major.name)}</h3>${major.units.map(unit=>`${unit.name?`<h4>${esc(unit.name)}</h4>`:''}<div class="resource-group-list">${unit.items.map(item=>videoCard(item.resource,item.index)).join('')}</div>`).join('')}</section>`).join('')}else content=`<div class="resource-group-list">${items.map(videoCard).join('')}</div>`}else if(activeTab==='syllabus')content=selected.categorySubject?renderCategorySubjectSyllabus(selected):renderSubjectSyllabus(selected.name);else content=`<div class="resource-group-list">${items.map(r=>`<article class="resource supplied-resource"><span class="file-icon">${/\.png$/i.test(r.fileName||'')?'PNG':'PDF'}</span><div class="res-info"><strong>${esc(r.title||'Study resource')}</strong><span>${esc(r.type)} · ${/\.png$/i.test(r.fileName||'')?'Image':'PDF'}</span></div><div class="resource-actions"><button class="action" type="button" data-open-resource="${resources.indexOf(r)}">View</button></div></article>`).join('')}</div>`;panel.innerHTML=activeTab==='syllabus'?content:items.length?`<div class="list-label">${esc(typesForTab[0])} · ${items.length} ${items.length===1?'resource':'resources'}</div>${content}`:`<div class="resource-empty"><strong>${esc(typesForTab[0]||'Resources')}</strong><span>No ${(typesForTab[0]||'resources').toLowerCase()} have been added for this subject yet.</span></div>`;panel.querySelectorAll('[data-open-resource]').forEach(button=>button.onclick=()=>openResource(resources[Number(button.dataset.openResource)]));panel.querySelectorAll('[data-open-video]').forEach(card=>{const play=()=>openYoutubeVideo(items[Number(card.dataset.openVideo)]);card.addEventListener('click',play);card.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();play()}})});panel.querySelectorAll('[data-geography-major]').forEach(card=>{const openMajor=()=>{selected.categoryMajor=card.dataset.geographyMajor;document.getElementById('sheetTitle').textContent='Geography '+selected.categoryMajor;document.getElementById('sheetDesc').textContent=selected.categoryMajor==='Major 1'?'Introduction to Physical Geography':'Practicals in Elementary Cartography';renderPanel()};card.addEventListener('click',openMajor);card.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openMajor()}})});panel.querySelector('[data-geography-major-back]')?.addEventListener('click',()=>{delete selected.categoryMajor;document.getElementById('sheetTitle').textContent=selected.name;document.getElementById('sheetDesc').textContent=selected.desc;renderPanel()})}function updateSubjectTabAvailability(){const resources=Array.isArray(selected?.resources)?selected.resources:[],hasType=(...types)=>resources.some(resource=>types.includes(resource.type)),hasSyllabus=hasType('Syllabus')||Boolean(selected?.categorySyllabus?.length)||(typeof additionalSyllabi!=='undefined'&&additionalSyllabi.some(entry=>entry.subject===selected?.name||entry.subject===selected?.sourceSubject)),availability={books:hasType('Textbooks','Books')||Boolean(selected?.books?.length),syllabus:hasSyllabus,'short-notes':hasType('Study Notes','Short Notes')||Boolean(selected?.notes?.length),'question-bank':hasType('Question Banks','Question Bank')||Boolean(quizBankData?.[selected?.id]?.length),'answer-key':hasType('Answer Keys','Answer Key'),videos:subjectVideoResources(selected).length>0};document.querySelectorAll('.subject-resource-tabs .tab').forEach(tab=>{const available=Boolean(availability[tab.dataset.tab]);tab.classList.toggle('tab-unavailable',!available);tab.dataset.available=available?'true':'false';const label=tab.querySelector('span')?.textContent?.trim()||tab.dataset.tab;tab.setAttribute('aria-label',available?label:label+' · no materials available yet')})} function renderPanel(){if(sheet.dataset.mode==='flashcards'){renderFlashcards();return}if(sheet.dataset.mode==='quiz'){if(quizBankData[selected.id]?.length){renderQuestionBankQuiz();return}if((selected.resources||[]).some(r=>r.type==='Question Banks'||r.type==='Question Bank')){panel.innerHTML=`<div class="quiz"><div class="quiz-art">\u25f7</div><div class="sheet-kicker">SOURCE-BASED PRACTICE</div><h3>Answer key needed</h3><p>${esc(selected.name)} has a linked question bank, but no answer key is linked yet. Add its answer key to build source-based Flash Cards and Quizzes.</p></div>`;return}panel.innerHTML=`<div class="quiz"><div class="quiz-art">\u25f7</div><div class="sheet-kicker">Practice session</div><h3>${esc(selected.name)} Quiz Arena</h3><p>Take a focused five-minute practice round and see what you already know.</p><button class="primary" id="startQuiz">Start 5-Minute Practice Quiz</button></div>`;panel.querySelector('#startQuiz').onclick=startQuiz;return}updateSubjectTabAvailability();if(activeTab==='videos'||activeTab==='syllabus'||selected.resources?.length||selected.categorySubject){renderSuppliedPanel();return}if(activeTab==='books'||activeTab==='short-notes'){const notes=selected.notes||[];panel.innerHTML=notes.length?'<div class="list-label">'+(activeTab==='books'?'Books':'Short notes')+' · '+notes.length+' resources</div>'+notes.map((n,i)=>`<article class="resource"><span class="file-icon">PDF</span><div class="res-info"><strong>${esc(n)}</strong><span>${i===0?'Module 1':'Study resource'} · PDF</span></div><button class="action" data-download="${esc(n)}">Download PDF</button></article>`).join(''):'<div class="resource-empty">No resources have been added for this subject yet.</div>'}else if(activeTab==='question-bank'){panel.innerHTML='<div class="list-label">Past papers · Question bank</div>'+papers.map(([year,title])=>`<article class="resource"><span class="file-icon">PDF</span><div class="res-info"><strong>${selected.name} · ${title}</strong><span>${year} · Archive entry</span></div><button class="action" data-paper="${year} ${title}">View paper</button></article>`).join('')}else{panel.innerHTML=activeTab==='syllabus'?'<div class="resource-empty"><strong>Syllabus</strong><span>No syllabus has been added for this subject yet.</span></div>':'<div class="resource-empty">No answer keys have been added for this subject yet.</div>'}panel.querySelectorAll('[data-download]').forEach(b=>b.addEventListener('click',()=>downloadPdf(b.dataset.download)));panel.querySelectorAll('[data-paper]').forEach(b=>b.addEventListener('click',()=>showToast(`${b.dataset.paper} sample added to your study list`)))} function downloadPdf(title){const lines=['VISH HUB  |  FYBA ACADEMIC HUB','',selected.name,'',title.replace('.pdf',''),'','Study handout preview','This is a starter resource generated by the VISH HUB demo.','Add your verified course material to replace this sample handout.','','Prepared for FYBA Academic Hub','By Vishal Jadhav'];const escPdf=s=>s.replaceAll('\\','\\\\').replaceAll('(','\\(').replaceAll(')','\\)');const stream='BT\n/F1 18 Tf\n54 760 Td\n('+escPdf(lines[0])+') Tj\n/F1 12 Tf\n0 -42 Td\n('+escPdf(lines[2])+') Tj\n0 -28 Td\n('+escPdf(lines[4])+') Tj\n/F1 10 Tf\n0 -45 Td\n('+escPdf(lines[6])+') Tj\n0 -18 Td\n('+escPdf(lines[7])+') Tj\n0 -18 Td\n('+escPdf(lines[8])+') Tj\n0 -50 Td\n('+escPdf(lines[10])+') Tj\n0 -18 Td\n('+escPdf(lines[11])+') Tj\nET';const objs=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',`<< /Length ${new TextEncoder().encode(stream).length} >>\nstream\n${stream}\nendstream`];let pdf='%PDF-1.4\n',offs=[0];for(let i=0;i<objs.length;i++){offs.push(new TextEncoder().encode(pdf).length);pdf+=(i+1)+' 0 obj\n'+objs[i]+'\nendobj\n'}const xref=new TextEncoder().encode(pdf).length;pdf+='xref\n0 6\n0000000000 65535 f \n'+offs.slice(1).map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('')+'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([pdf],{type:'application/pdf'}));a.download=title.replace(/[^a-z0-9 -]/gi,'').replaceAll(' ','-');a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);showToast('Sample handout downloaded · replace with course PDF when ready')}
+}function openSyllabusPage(){renderSyllabusPage();const page=document.getElementById('syllabusPage');page.hidden=false;page.classList.add('open');enterAppPage('syllabus')}function hideSyllabusPage(){const page=document.getElementById('syllabusPage');page.classList.remove('open');page.hidden=true;document.getElementById('syllabusPageSearch').value=''}function closeSyllabusPage(){closeAppPage('syllabus')}document.getElementById('openSyllabusPage').addEventListener('click',openSyllabusPage);document.getElementById('openSyllabusPage').addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openSyllabusPage()}});document.getElementById('closeSyllabusPage').addEventListener('click',closeSyllabusPage);document.getElementById('syllabusPageSearch').addEventListener('input',renderSyllabusPage);const oeNoteResources={electronics:{type:'Study Notes',title:'Electronics (OE) Unit 1 - Electric Geyser',fileName:'Electronics (OE) Unit 1 - Electric Geyser.pdf',driveUrl:'https://drive.google.com/file/d/1CXt80moj_k7TK9s8vYPseN9aYhlCxwoP/preview'},electronicsUnit2:{type:'Study Notes',title:'Electronics (OE) Unit 2 - Induction Cooker',fileName:'Electronics (OE) Unit 2 - Induction Cooker.pdf',driveUrl:'https://drive.google.com/file/d/1sRaf9T_SfwKf_RZWTcGUXlzHBFAHMusI/preview'},electronicsUnit3:{type:'Study Notes',title:'Electronics (OE) Unit 3 - Microwave Oven',fileName:'Electronics (OE) Unit 3 - Microwave Oven.pdf',driveUrl:'https://drive.google.com/file/d/1j151WrR53V6C55BqeFpMj79_DKWuX-5t/preview'},geology:{type:'Study Notes',title:'Geology (OE) Notes',fileName:'Geology (OE) Notes.pdf',driveUrl:'https://drive.google.com/file/d/1e6GByJHv0XlY3eIa-h92A5m_aliIIYQx/preview'},zoology:{type:'Study Notes',title:'Zoology (OE) Notes',fileName:'Zoology (OE) Notes.pdf',driveUrl:'https://drive.google.com/file/d/1FDqHs74tCn-17puO-mXUnkg1Y8_Cmile/preview'},aec:{type:'Study Notes',title:'AEC Communication Notes',fileName:'AEC - Communication Notes.pdf',driveUrl:'https://drive.google.com/file/d/1ygp4eDodfcgQN78MZZ4tVdvvKPZAIN0q/preview'}};function openCategorySubject(parentName,cardName){const all=[...subjects.flatMap(subject=>(subject.resources||[]).filter(resource=>resource.type==='Syllabus').map(resource=>({subject:subject.name,resource}))),...additionalSyllabi].filter(({resource})=>!/(?:semester\s*(?:ii|2)\b)/i.test((resource.title||'')+' '+(resource.extracted?.course||''))).map(entry=>({...entry,sourceSubject:entry.subject,...syllabusGrouping(entry.subject,entry.resource)})),titleOf=entry=>(entry.resource.title||'')+' '+(entry.resource.extracted?.course||''),unique=items=>items.filter((entry,index,list)=>list.findIndex(candidate=>(candidate.resource.title||'').trim().toLowerCase()===(entry.resource.title||'').trim().toLowerCase())===index);let entries=[];if(parentName==='SEC')entries=unique(all.filter(entry=>cardName==='SEC Psychology'?/Health Promoting Behaviours/i.test(titleOf(entry)):cardName==='SEC Economics'?/Socio-Economic Survey/i.test(titleOf(entry)):cardName==='SEC English'?/Soft Skills/i.test(titleOf(entry)):/Citizenship|Governance/i.test(titleOf(entry))));else if(parentName==='OE'){const filters={'OE Electronics':/Electronics|Domestic Equipment Maintenance/i,'OE Botany':/Botany|Landscaping & Gardening/i,'OE Geography':entry=>/Geography|GEOOE/i.test(titleOf(entry))&&/Open Elective|OE|GEOOE/i.test(titleOf(entry)),'OE Zoology':/Zoology|Food,? Nutrition and Health/i};const filter=filters[cardName];entries=unique(all.filter(entry=>typeof filter==='function'?filter(entry):filter?.test(titleOf(entry))))}else if(parentName==='Common Subjects'){if(cardName==='AEC')entries=unique(all.filter(entry=>/AEC/i.test(titleOf(entry))&&/Semester I/i.test(entry.resource.extracted?.course||'')))}else if(parentName==='Other Subjects'){entries=(cardName==='French'||cardName==='French Major 1')?unique(all.filter(entry=>entry.sourceSubject==='French')):unique(all.filter(entry=>entry.sourceSubject==='Geography'&&(cardName==='Geography'||(cardName==='Major 1'?/Major 1|Introduction to Physical Geography/i.test(titleOf(entry)):/Major 2|Cartography|Practicals in Elementary Cartography/i.test(titleOf(entry))))))}const noteKeys=parentName==='OE'?({'OE Electronics':['electronics','electronicsUnit2','electronicsUnit3'],'OE Geology':['geology'],'OE Zoology':['zoology']}[cardName]||[]):parentName==='Common Subjects'&&cardName==='AEC'?['aec']:[],resources=entries.map(entry=>entry.resource).concat(noteKeys.map(key=>oeNoteResources[key])),pageSubject={id:'category-'+parentName.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+cardName.toLowerCase().replace(/[^a-z0-9]+/g,'-'),name:cardName,desc:({ 'SEC Psychology':'Health Promoting Behaviours','SEC Economics':'Socio-Economic Survey','SEC English':'Soft Skills','SEC Politics':'Citizenship and Governance','OE Botany':'Landscaping & Gardening','OE Geography':'Basic Concepts in Geography - I','OE Electronics':'Electronics (OE) study notes','OE Geology':'Geology (OE) study notes','OE Zoology':'Food, Nutrition and Health',AEC:'Communication Skills in English',VEC:'Value Education',IKS:'Indian Knowledge System','Major 1':'Introduction to Physical Geography','Major 2':'Practicals in Elementary Cartography',Geography:'Major 1 and Major 2 · Geography'})[cardName]||parentName+' subject',resources,categorySubject:true,categorySyllabus:entries};if(appPageStack.at(-1)?.type==='category'){const categoryEntry=appPageStack.pop();hideCategoryPage();syncAppPageState();if(categoryEntry.historyEntry){try{history.replaceState({appPage:'home'},'')}catch{}}}openSubject(pageSubject,'All')}function openCategoryPage(subject,focusCard=''){const page=document.getElementById('categoryPage'),titles={sec:'SEC',oe:'OE',common:'Common Subjects',other:'Other Subjects'},descriptions={sec:'SEC · choose a subject',oe:'OE · choose a subject',common:'AEC · VEC · IKS',other:'Geography · French'},commonTitles={AEC:'AEC · Communication Skills in English',VEC:'VEC · Value Education',IKS:'IKS · Course resources'},commonDescriptions={AEC:'Common Subject · Ability Enhancement Course',VEC:'Common Subject · Value Education Course',IKS:'Common Subject · Indian Knowledge System'};document.getElementById('categoryPageTitle').textContent=commonTitles[focusCard]||titles[subject.id]||subject.name;document.getElementById('categoryPageDescription').textContent=commonDescriptions[focusCard]||descriptions[subject.id]||'Browse subjects in this collection.';document.getElementById('categoryPageContent').innerHTML=renderSubjectSyllabus(subject.name,focusCard);page.querySelectorAll('.category-subject-card').forEach(card=>{const summary=card.querySelector('summary'),name=summary?.dataset.subjectName||card.querySelector('.category-subject-copy strong')?.textContent?.trim();if(summary&&name)summary.addEventListener('click',event=>{event.preventDefault();openCategorySubject(subject.name,name)})});page.querySelectorAll('[data-open-oe-note]').forEach(button=>button.addEventListener('click',event=>{event.stopPropagation();const resource=oeNoteResources[button.dataset.openOeNote];if(resource)openResource(resource)}));page.hidden=false;page.classList.add('open');enterAppPage('category',subject.id)}function hideCategoryPage(){const page=document.getElementById('categoryPage');page.classList.remove('open');page.hidden=true;document.getElementById('categoryPageContent').replaceChildren()}function closeCategoryPage(){closeAppPage('category')}document.getElementById('closeCategoryPage').addEventListener('click',closeCategoryPage);function openVideoPage(){const page=document.getElementById('videoPage');page.hidden=false;page.classList.add('open');window.setTimeout(()=>{if(!page.hidden)renderVideoLibrary()},60);document.querySelectorAll('.navitem').forEach(item=>{const active=item.dataset.nav==='videos';item.classList.toggle('active',active);if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current')});enterAppPage('videos')}function hideVideoPage(){const page=document.getElementById('videoPage');page.classList.remove('open');page.hidden=true;document.getElementById('videoPageSearch').value='';document.querySelectorAll('.navitem').forEach(item=>{const active=item.dataset.nav==='home';item.classList.toggle('active',active);if(active)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current')})}function closeVideoPage(){closeAppPage('videos')}document.getElementById('openVideosPage').addEventListener('click',openVideoPage);document.getElementById('openVideosPage').addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openVideoPage()}});document.getElementById('closeVideoPage').addEventListener('click',closeVideoPage);document.getElementById('videoPageSearch').addEventListener('input',renderVideoPage);document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.getElementById('videoPage').hidden)closeVideoPage();if(event.key==='Escape'&&!document.getElementById('syllabusPage').hidden)closeSyllabusPage()});function renderCategorySubjectSyllabus(subject){const entries=subject.categorySyllabus||[];if(!entries.length)return'<div class="syllabus-page-empty">No syllabus documents have been added yet.</div>';const majors=new Map();entries.forEach(entry=>{const major=entry.major||subject.name;if(!majors.has(major))majors.set(major,[]);majors.get(major).push(entry)});return'<details class="syllabus-subject-group"><summary><span>'+esc(subject.name)+'</span><small>'+majors.size+' '+(majors.size===1?'group':'groups')+'</small></summary><div class="syllabus-major-list">'+syllabusMajorEntries(subject.name,majors).map(([major,courses])=>'<details class="syllabus-major-group"><summary><span>'+esc(major)+'</span></summary><div class="syllabus-course-list">'+courses.map(entry=>renderSyllabusCourseCard(entry)).join('')+'</div></details>').join('')+'</div></details>'} function renderSuppliedPanel(){const resources=selected.resources||[],types={'books':['Textbooks','Books'],'syllabus':['Syllabus'],'short-notes':['Study Notes','Short Notes'],'question-bank':['Question Banks','Question Bank'],'answer-key':['Answer Keys','Answer Key'],'videos':['Videos','Video Lectures']},typesForTab=types[activeTab]||[],items=activeTab==='videos'?subjectVideoResources(selected):resources.filter(r=>typesForTab.includes(r.type)),videoCard=(r,index)=>`<article class="resource supplied-resource video-resource" data-open-video="${index}" role="button" tabindex="0" aria-label="Watch ${esc(r.title||'Video lecture')}"><div class="video-resource-preview" aria-hidden="true"><img src="${videoThumbnail(r)}" alt=""></div><div class="res-info"><strong>${esc(r.title||'Video lecture')}</strong><span class="video-resource-channel">${esc(r.channel||'YouTube')}</span></div><div class="resource-actions"><span class="action" aria-hidden="true">Watch</span></div></article>`;let content='';if(activeTab==='videos'){if(items.some(r=>r.major)){const majors=[];items.forEach((resource,index)=>{const majorName=resource.major||'Other Videos',unitName=resource.unit||'Lessons';let major=majors.find(group=>group.name===majorName);if(!major){major={name:majorName,units:[]};majors.push(major)}let unit=major.units.find(group=>group.name===unitName);if(!unit){unit={name:unitName,items:[]};major.units.push(unit)}unit.items.push({resource,index})});content=majors.map(major=>`<section class="history-video-major"><h3>${esc(major.name)}</h3>${major.units.map(unit=>`${unit.name?`<h4>${esc(unit.name)}</h4>`:''}<div class="resource-group-list">${unit.items.map(item=>videoCard(item.resource,item.index)).join('')}</div>`).join('')}</section>`).join('')}else content=`<div class="resource-group-list">${items.map(videoCard).join('')}</div>`}else if(activeTab==='syllabus')content=selected.categorySubject?renderCategorySubjectSyllabus(selected):renderSubjectSyllabus(selected.name);else content=`<div class="resource-group-list">${items.map(r=>`<article class="resource supplied-resource"><span class="file-icon">${/\.png$/i.test(r.fileName||'')?'PNG':'PDF'}</span><div class="res-info"><strong>${esc(r.title||'Study resource')}</strong><span>${esc(r.type)} · ${/\.png$/i.test(r.fileName||'')?'Image':'PDF'}</span></div><div class="resource-actions"><button class="action" type="button" data-open-resource="${resources.indexOf(r)}">View</button></div></article>`).join('')}</div>`;panel.innerHTML=activeTab==='syllabus'?content:items.length?`<div class="list-label">${esc(typesForTab[0])} · ${items.length} ${items.length===1?'resource':'resources'}</div>${content}`:`<div class="resource-empty"><strong>${esc(typesForTab[0]||'Resources')}</strong><span>No ${(typesForTab[0]||'resources').toLowerCase()} have been added for this subject yet.</span></div>`;panel.querySelectorAll('[data-open-resource]').forEach(button=>button.onclick=()=>openResource(resources[Number(button.dataset.openResource)]));panel.querySelectorAll('[data-open-video]').forEach(card=>{const play=()=>openYoutubeVideo(items[Number(card.dataset.openVideo)]);card.addEventListener('click',play);card.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();play()}})});panel.querySelectorAll('[data-geography-major]').forEach(card=>{const openMajor=()=>{selected.categoryMajor=card.dataset.geographyMajor;document.getElementById('sheetTitle').textContent='Geography '+selected.categoryMajor;document.getElementById('sheetDesc').textContent=selected.categoryMajor==='Major 1'?'Introduction to Physical Geography':'Practicals in Elementary Cartography';renderPanel()};card.addEventListener('click',openMajor);card.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openMajor()}})});panel.querySelector('[data-geography-major-back]')?.addEventListener('click',()=>{delete selected.categoryMajor;document.getElementById('sheetTitle').textContent=selected.name;document.getElementById('sheetDesc').textContent=selected.desc;renderPanel()})}function updateSubjectTabAvailability(){const resources=Array.isArray(selected?.resources)?selected.resources:[],hasType=(...types)=>resources.some(resource=>types.includes(resource.type)),hasSyllabus=hasType('Syllabus')||Boolean(selected?.categorySyllabus?.length)||(typeof additionalSyllabi!=='undefined'&&additionalSyllabi.some(entry=>entry.subject===selected?.name||entry.subject===selected?.sourceSubject)),availability={books:hasType('Textbooks','Books')||Boolean(selected?.books?.length),syllabus:hasSyllabus,'short-notes':hasType('Study Notes','Short Notes')||Boolean(selected?.notes?.length),'question-bank':hasType('Question Banks','Question Bank')||Boolean(quizBankData?.[selected?.id]?.length),'answer-key':hasType('Answer Keys','Answer Key'),videos:subjectVideoResources(selected).length>0};document.querySelectorAll('.subject-resource-tabs .tab').forEach(tab=>{const available=Boolean(availability[tab.dataset.tab]);tab.classList.toggle('tab-unavailable',!available);tab.dataset.available=available?'true':'false';const label=tab.querySelector('span')?.textContent?.trim()||tab.dataset.tab;tab.setAttribute('aria-label',available?label:label+' · no materials available yet')})} function renderPanel(){if(sheet.dataset.mode==='flashcards'){renderFlashcards();return}if(sheet.dataset.mode==='quiz'){if(quizBankData[selected.id]?.length){renderQuestionBankQuiz();return}if((selected.resources||[]).some(r=>r.type==='Question Banks'||r.type==='Question Bank')){panel.innerHTML=`<div class="quiz"><div class="quiz-art">\u25f7</div><div class="sheet-kicker">SOURCE-BASED PRACTICE</div><h3>Answer key needed</h3><p>${esc(selected.name)} has a linked question bank, but no answer key is linked yet. Add its answer key to build source-based Flash Cards and Quizzes.</p></div>`;return}panel.innerHTML=`<div class="quiz"><div class="quiz-art">\u25f7</div><div class="sheet-kicker">Practice session</div><h3>${esc(selected.name)} Quiz Arena</h3><p>Take a focused five-minute practice round and see what you already know.</p><button class="primary" id="startQuiz">Start 5-Minute Practice Quiz</button></div>`;panel.querySelector('#startQuiz').onclick=startQuiz;return}updateSubjectTabAvailability();if(activeTab==='videos'||activeTab==='syllabus'||selected.resources?.length||selected.categorySubject){renderSuppliedPanel();return}if(activeTab==='books'||activeTab==='short-notes'){const notes=selected.notes||[];panel.innerHTML=notes.length?'<div class="list-label">'+(activeTab==='books'?'Books':'Short notes')+' · '+notes.length+' resources</div>'+notes.map((n,i)=>`<article class="resource"><span class="file-icon">PDF</span><div class="res-info"><strong>${esc(n)}</strong><span>${i===0?'Module 1':'Study resource'} · PDF</span></div><button class="action" data-download="${esc(n)}">Download PDF</button></article>`).join(''):'<div class="resource-empty">No resources have been added for this subject yet.</div>'}else if(activeTab==='question-bank'){panel.innerHTML='<div class="list-label">Past papers · Question bank</div>'+papers.map(([year,title])=>`<article class="resource"><span class="file-icon">PDF</span><div class="res-info"><strong>${selected.name} · ${title}</strong><span>${year} · Archive entry</span></div><button class="action" data-paper="${year} ${title}">View paper</button></article>`).join('')}else{panel.innerHTML=activeTab==='syllabus'?'<div class="resource-empty"><strong>Syllabus</strong><span>No syllabus has been added for this subject yet.</span></div>':'<div class="resource-empty">No answer keys have been added for this subject yet.</div>'}panel.querySelectorAll('[data-download]').forEach(b=>b.addEventListener('click',()=>downloadPdf(b.dataset.download)));panel.querySelectorAll('[data-paper]').forEach(b=>b.addEventListener('click',()=>showToast(`${b.dataset.paper} sample added to your study list`)))} function downloadPdf(title){const lines=['VISH HUB  |  FYBA ACADEMIC HUB','',selected.name,'',title.replace('.pdf',''),'','Study handout preview','This is a starter resource generated by the VISH HUB demo.','Add your verified course material to replace this sample handout.','','Prepared for FYBA Academic Hub','By Vishal Jadhav'];const escPdf=s=>s.replaceAll('\\','\\\\').replaceAll('(','\\(').replaceAll(')','\\)');const stream='BT\n/F1 18 Tf\n54 760 Td\n('+escPdf(lines[0])+') Tj\n/F1 12 Tf\n0 -42 Td\n('+escPdf(lines[2])+') Tj\n0 -28 Td\n('+escPdf(lines[4])+') Tj\n/F1 10 Tf\n0 -45 Td\n('+escPdf(lines[6])+') Tj\n0 -18 Td\n('+escPdf(lines[7])+') Tj\n0 -18 Td\n('+escPdf(lines[8])+') Tj\n0 -50 Td\n('+escPdf(lines[10])+') Tj\n0 -18 Td\n('+escPdf(lines[11])+') Tj\nET';const objs=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',`<< /Length ${new TextEncoder().encode(stream).length} >>\nstream\n${stream}\nendstream`];let pdf='%PDF-1.4\n',offs=[0];for(let i=0;i<objs.length;i++){offs.push(new TextEncoder().encode(pdf).length);pdf+=(i+1)+' 0 obj\n'+objs[i]+'\nendobj\n'}const xref=new TextEncoder().encode(pdf).length;pdf+='xref\n0 6\n0000000000 65535 f \n'+offs.slice(1).map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('')+'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([pdf],{type:'application/pdf'}));a.download=title.replace(/[^a-z0-9 -]/gi,'').replaceAll(' ','-');a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);showToast('Sample handout downloaded · replace with course PDF when ready')}
  function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2800)}function initFocusWidget(){const dayKey=d=>{const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day},load=()=>{try{return JSON.parse(localStorage.getItem(progressStorageKey('vishHubFocusV1'))||'{"goal":3,"days":{}}')}catch{return{goal:3,days:{}}}},save=()=>{try{localStorage.setItem(progressStorageKey('vishHubFocusV1'),JSON.stringify(focusData))}catch{}},goal=document.getElementById('focusGoal'),sessions=document.getElementById('focusSessions'),streak=document.getElementById('focusStreak'),progress=document.getElementById('focusProgress'),track=document.querySelector('.focus-progress'),message=document.getElementById('focusMessage'),timerBox=document.getElementById('focusTimer'),clock=document.getElementById('focusClock'),status=document.getElementById('focusTimerStatus'),start=document.getElementById('startFocus'),pause=document.getElementById('pauseFocus'),end=document.getElementById('endFocus');let focusData=load(),seconds=1500,interval=null,paused=false;focusData.days=focusData.days||{};focusData.goal=Math.max(1,Math.min(5,Number(focusData.goal)||3));goal.value=String(focusData.goal);function render(){const today=dayKey(new Date()),count=Number(focusData.days[today]||0),target=focusData.goal;let streakCount=0,probe=new Date();if(!count)probe.setDate(probe.getDate()-1);while(focusData.days[dayKey(probe)]>0){streakCount++;probe.setDate(probe.getDate()-1)}sessions.textContent=count+' / '+target;streak.textContent=streakCount+' day'+(streakCount===1?'':'s')+' streak';progress.style.width=Math.min(100,count/target*100)+'%';track.setAttribute('aria-valuemax',String(target));track.setAttribute('aria-valuenow',String(Math.min(target,count)));if(count>=target)message.textContent='Daily focus goal complete. Excellent work.';else if(count>0)message.textContent='One focused session at a time. Keep your streak alive.'}function displayTime(){clock.textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0')}function stopTimer(){clearInterval(interval);interval=null;timerBox.hidden=true;start.hidden=false;seconds=1500;paused=false;pause.textContent='Pause';status.textContent='FOCUS SESSION';displayTime()}function completeSession(){clearInterval(interval);interval=null;const today=dayKey(new Date());focusData.days[today]=Number(focusData.days[today]||0)+1;save();render();timerBox.hidden=true;start.hidden=false;seconds=1500;displayTime();message.textContent='Focus session complete. Your progress is saved on this device.';showToast('Focus session complete · progress saved')}function beginTimer(){seconds=1500;paused=false;timerBox.hidden=false;start.hidden=true;pause.textContent='Pause';status.textContent='FOCUS SESSION';displayTime();interval=setInterval(()=>{if(paused)return;seconds--;displayTime();if(seconds<=0)completeSession()},1000)}goal.addEventListener('change',()=>{focusData.goal=Math.max(1,Math.min(5,Number(goal.value)||3));save();render()});start.addEventListener('click',beginTimer);pause.addEventListener('click',()=>{paused=!paused;pause.textContent=paused?'Resume':'Pause';status.textContent=paused?'SESSION PAUSED':'FOCUS SESSION'});end.addEventListener('click',()=>{stopTimer();message.textContent='Session ended early. Start again whenever you’re ready.'});window.addEventListener('vishhub-progress-state',e=>{const local=e.detail?.focus;if(!local)return;focusData={goal:Math.max(1,Math.min(5,Number(local.goal)||3)),days:{...(local.days||{})}};goal.value=String(focusData.goal);save();render()});render()}
  function startQuiz(){panel.innerHTML=`<div class="quiz"><div class="quiz-art">◷</div><div class="sheet-kicker">PRACTICE SESSION</div><h3>${esc(selected.name)} · Quick Quiz</h3><p>This subject does not have a supplied answer-checked quiz yet. Scores appear here when a quiz is completed.</p><button class="study-secondary" id="openGenericScoreboard">View Scoreboard</button></div>`;panel.querySelector('#openGenericScoreboard').onclick=()=>renderQuizScoreboard(()=>renderPanel())} document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{if(studyState.timer){clearInterval(studyState.timer);studyState.timer=null}sheet.dataset.mode='';sheet.classList.remove('study-mode-active');activeTab=t.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===t));renderPanel()}));document.getElementById('closeSheet').onclick=()=>{sheet.dataset.mode='';sheet.classList.remove('study-mode-active');closeSubject()};scrim.onclick=closeSubject;search.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();openSearchPage(search.value)}});document.getElementById('searchSubmit').addEventListener('click',()=>openSearchPage(search.value));document.getElementById('searchPageInput').addEventListener('input',event=>renderSearchResults(event.currentTarget.value));document.getElementById('searchPageInput').addEventListener('search',event=>renderSearchResults(event.currentTarget.value));document.getElementById('clearSearchPage').addEventListener('click',()=>{const field=document.getElementById('searchPageInput');field.value='';renderSearchResults('');field.focus()});document.getElementById('closeSearchPage').addEventListener('click',closeSearchPage);document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.getElementById('searchPage').hidden)closeSearchPage()});
  initFocusWidget();
@@ -4031,7 +4031,7 @@ const menuToggle=document.getElementById('menuToggle'),headerMenu=document.getEl
 function closeHeaderMenu(){headerMenu.hidden=true;menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','Open navigation menu')}
 menuToggle.addEventListener('click',()=>{const open=menuToggle.getAttribute('aria-expanded')!=='true';menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');headerMenu.hidden=!open});
 headerMenu.querySelectorAll('[data-menu-nav]').forEach(item=>item.addEventListener('click',()=>{const nav=document.querySelector('.navitem[data-nav="'+item.dataset.menuNav+'"]');if(nav)nav.click();else if(item.dataset.menuNav==='student-profile')openStudentProfile();else if(item.dataset.menuNav==='subjects')document.getElementById('grid').scrollIntoView({behavior:'smooth',block:'start'});closeHeaderMenu()}));
-document.addEventListener('click',e=>{if(!e.target.closest('.topline'))closeHeaderMenu()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHeaderMenu()});const notificationPage=document.getElementById('notificationPage'),notificationScrim=document.getElementById('notificationScrim'),notificationBell=document.getElementById('bell'),notificationList=document.getElementById('notificationList');function closeNotifications(){notificationPage.classList.remove('open');notificationScrim.classList.remove('open');document.body.style.overflow=''}function openNotifications(){notificationPage.classList.add('open');notificationScrim.classList.add('open');document.body.style.overflow='hidden';const read=localStorage.getItem('vishHubNotificationsRead')==='true';notificationList.querySelectorAll('.notification-unread').forEach(dot=>dot.hidden=read);notificationBell.querySelector('i').hidden=read}notificationBell.onclick=openNotifications;document.getElementById('closeNotifications').onclick=closeNotifications;notificationScrim.onclick=closeNotifications;document.getElementById('markNotificationsRead').onclick=()=>{localStorage.setItem('vishHubNotificationsRead','true');notificationList.querySelectorAll('.notification-unread').forEach(dot=>dot.hidden=true);notificationBell.querySelector('i').hidden=true;showToast('All notifications marked as read')};notificationList.querySelectorAll('[data-notification]').forEach(item=>item.onclick=()=>{const action=item.dataset.notification;closeNotifications();document.querySelector('.navitem[data-nav=subjects]').click()});document.querySelectorAll('.study-shortcut').forEach(button=>button.addEventListener('click',()=>{const section=button.dataset.studySection;document.querySelectorAll('.study-shortcut').forEach(item=>{item.classList.toggle('active',item===button);if(item===button)item.setAttribute('aria-current','location');else item.removeAttribute('aria-current')});const title=document.querySelector('#mainSubjectsSection h2'),meta=document.getElementById('homeSubjectsMeta'),labels={main:'Main Subjects',common:'Common Subjects',other:'Other Subjects'},details={main:'FYBA · YEAR 1',common:'AEC · VEC · IKS',other:'GEOGRAPHY · FRENCH MAJOR 1'};if(title)title.textContent=labels[section]||labels.main;if(meta)meta.textContent=details[section]||details.main;document.getElementById('grid').setAttribute('aria-label',labels[section]||labels.main);renderGrid(document.getElementById('search').value,section)}));renderGrid();(async()=>{try{const response=await fetch('/api/resources');if(!response.ok)return;const data=await response.json();for(const subject of subjects){subject.resources=(subject.resources||[]).filter(r=>!r.dynamic);(data.resources||[]).filter(r=>r.subject===subject.id).forEach(r=>subject.resources.push({...r,dynamic:true}))}if(!document.getElementById('searchPage').hidden)renderSearchResults(document.getElementById('searchPageInput').value);else document.querySelectorAll('#grid .subject').forEach(card=>{const subject=subjects.find(s=>s.id===card.dataset.subjectId);if(subject){}});if(!document.getElementById('videoPage').hidden)renderVideoLibrary()}catch{}})();
+document.addEventListener('click',e=>{if(!e.target.closest('.topline'))closeHeaderMenu()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHeaderMenu()});const notificationPage=document.getElementById('notificationPage'),notificationScrim=document.getElementById('notificationScrim'),notificationBell=document.getElementById('bell'),notificationList=document.getElementById('notificationList');function closeNotifications(){notificationPage.classList.remove('open');notificationScrim.classList.remove('open');document.body.style.overflow=''}function openNotifications(){notificationPage.classList.add('open');notificationScrim.classList.add('open');document.body.style.overflow='hidden';const read=localStorage.getItem('vishHubNotificationsRead')==='true';notificationList.querySelectorAll('.notification-unread').forEach(dot=>dot.hidden=read);notificationBell.querySelector('i').hidden=read}notificationBell.onclick=openNotifications;document.getElementById('closeNotifications').onclick=closeNotifications;notificationScrim.onclick=closeNotifications;document.getElementById('markNotificationsRead').onclick=()=>{localStorage.setItem('vishHubNotificationsRead','true');notificationList.querySelectorAll('.notification-unread').forEach(dot=>dot.hidden=true);notificationBell.querySelector('i').hidden=true;showToast('All notifications marked as read')};notificationList.querySelectorAll('[data-notification]').forEach(item=>item.onclick=()=>{const action=item.dataset.notification;closeNotifications();document.querySelector('.navitem[data-nav=subjects]').click()});document.querySelectorAll('.study-shortcut').forEach(button=>button.addEventListener('click',()=>{const section=button.dataset.studySection;document.querySelectorAll('.study-shortcut').forEach(item=>{item.classList.toggle('active',item===button);if(item===button)item.setAttribute('aria-current','location');else item.removeAttribute('aria-current')});const title=document.querySelector('#mainSubjectsSection h2'),meta=document.getElementById('homeSubjectsMeta'),labels={main:'Main Subjects',common:'Common Subjects',other:'Other Subjects'},details={main:'FYBA · YEAR 1',common:'AEC · VEC · IKS',other:'GEOGRAPHY · FRENCH MAJOR 1'};if(title)title.textContent=labels[section]||labels.main;if(meta)meta.textContent=details[section]||details.main;document.getElementById('grid').setAttribute('aria-label',labels[section]||labels.main);renderGrid(document.getElementById('search').value,section)}));renderGrid();window.vishHubAdminBridge={subjects,suppliedResources,additionalSyllabi,oeNoteResources,studyData,quizBankData,renderGrid:()=>renderGrid(document.getElementById('search')?.value||'',activeHomeSection),renderPanel,renderVideoLibrary,renderSyllabusPage,openResource,openYoutubeVideo,showToast,openSubject};window.vishHubSyncAdminData?.();
  const avatarOptions=[{id:'portrait',label:'Student',emoji:'👤',image:''},{id:'hero',label:'Superhero',emoji:'🦸'},{id:'heroine',label:'Heroine',emoji:'🦸‍♀️'},{id:'cartoon-cat',label:'Cartoon cat',emoji:'😺'},{id:'cartoon-dog',label:'Cartoon dog',emoji:'🐶'},{id:'dino',label:'Dino',emoji:'🦖'},{id:'movie-star',label:'Movie star',emoji:'🎬'},{id:'pop-star',label:'Pop star',emoji:'🎤'},{id:'athlete',label:'Athlete',emoji:'🏆'},{id:'robot',label:'Robot',emoji:'🤖'},{id:'wizard',label:'Wizard',emoji:'🧙'},{id:'dragon',label:'Dragon',emoji:'🐉'},{id:'astronaut',label:'Astronaut',emoji:'🧑‍🚀'},{id:'owl',label:'Scholar owl',emoji:'🦉'},{id:'book',label:'Bookworm',emoji:'📚'},{id:'fox',label:'Fox',emoji:'🦊'},{id:'moon',label:'Moon',emoji:'🌙'},{id:'star',label:'Golden star',emoji:'🌟'}];let selectedAvatar='portrait';const avatarChoices=document.createElement('div'),avatarPreview=document.getElementById('profileAvatarPreview');
  function paintAvatar(id){selectedAvatar=avatarOptions.some(a=>a.id===id)?id:'portrait';const avatar=avatarOptions.find(a=>a.id===selectedAvatar);avatarPreview.classList.toggle('portrait',selectedAvatar==='portrait');avatarPreview.dataset.avatarId=selectedAvatar;avatarPreview.innerHTML=avatar.image?'<img src="'+avatar.image+'" alt="">':'<span class="avatar-3d-figure">'+avatar.emoji+'</span>';const previewImage=avatarPreview.querySelector('img');if(previewImage)previewImage.onerror=()=>{previewImage.replaceWith(Object.assign(document.createElement('span'),{className:'avatar-3d-figure',textContent:'👤'}))};avatarPreview.setAttribute('aria-label',avatar.label+' profile avatar');avatarChoices.querySelectorAll('.avatar-choice').forEach(b=>{b.classList.toggle('selected',b.dataset.avatar===selectedAvatar);b.setAttribute('aria-pressed',String(b.dataset.avatar===selectedAvatar))})}
  document.getElementById('profilePhotoInput').addEventListener('change',async event=>{const input=event.currentTarget,file=input.files?.[0];input.value='';if(!file)return;try{await openProfilePhotoCrop(file)}catch(error){setFeedback('editFeedback',error.message||'Could not open this photo.',true)}});
@@ -4092,7 +4092,7 @@ paintAvatar('portrait');
   root.addEventListener('focusin',stop);
   root.addEventListener('focusout',event=>{if(!root.contains(event.relatedTarget))start()});
   document.addEventListener('visibilitychange',()=>document.hidden?stop():start());
-  showNotice(0,false);start();
+  window.vishHubNoticesBridge={notices,renderNotice:()=>{active=Math.min(active,Math.max(0,notices.length-1));if(notices.length)renderNotice()},showNotice};showNotice(0,false);start();
 })();
 </script><style id="study-major-unit-navy-gold">
 .sheet .study-controls .study-select{min-width:0;border:1px solid #d8bb5e!important;border-radius:13px 4px 13px 4px!important;background:linear-gradient(140deg,#17365d,#10294b 75%,#0b1d39)!important;color:#f2dfa0!important;font-family:var(--sans);font-size:11px;font-weight:800;letter-spacing:.015em;box-shadow:0 5px 13px #07172d25,inset 0 1px 0 #ffffff20!important}
@@ -4322,7 +4322,165 @@ paintAvatar('portrait');
 </style>
 <script>
 (function(){const splash=document.getElementById('appSplash'),app=document.querySelector('main.app');if(!splash)return;let started=false;const finish=()=>{if(started)return;started=true;const wait=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches?180:1500;window.setTimeout(()=>{splash.classList.add('is-hiding');if(app&&document.body.dataset.authReady==='true'&&document.body.dataset.authUser==='true')app.removeAttribute('inert');window.setTimeout(()=>{splash.hidden=true;splash.remove()},420)},wait)};if(app)app.setAttribute('inert','');if(document.readyState==='complete')finish();else window.addEventListener('load',finish,{once:true});window.setTimeout(finish,6000)})();
-</script><script type="module" src="auth-client.js"></script><style id="firebase-auth-controls">
+</script><script id="inline-auth-client">
+(()=>{
+  const AUTH_KEY = 'vishHubLocalAuthUserV1';
+  const ACCOUNTS_KEY = 'vishHubLocalAccountsV1';
+  const readJson = (k, fallback) => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? fallback; } catch { return fallback; } };
+  const writeJson = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  const rememberLocalUser = (user) => {
+    if (!user?.uid) return;
+    const users = readJson(ACCOUNTS_KEY, []);
+    const prior = Array.isArray(users) ? users.find(item => item.uid === user.uid) : null;
+    const next = (Array.isArray(users) ? users.filter(item => item.uid !== user.uid) : []);
+    next.push({ uid: user.uid, email: user.email || '', displayName: user.displayName || 'Student', createdAt: prior?.createdAt || new Date().toISOString(), lastSeenAt: new Date().toISOString() });
+    writeJson(ACCOUNTS_KEY, next);
+  };
+
+  let currentUser = readJson(AUTH_KEY, null);
+  if (currentUser) rememberLocalUser(currentUser);
+  let guestMode = false;
+  try {
+    if (!currentUser && localStorage.getItem('vishHubGuestModeV1') !== 'false') {
+      localStorage.setItem('vishHubGuestModeV1', 'true');
+      guestMode = true;
+    } else {
+      guestMode = localStorage.getItem('vishHubGuestModeV1') === 'true';
+    }
+  } catch { guestMode = true; }
+
+  const getProfileForUid = (uid) => readJson('vishHubProfileV1:' + uid, {
+    name: currentUser?.displayName || 'FYBA Student',
+    course: 'FYBA · First Year',
+    studentClass: 'FYBA',
+    division: 'A',
+    subjects: ['Psychology', 'Economics', 'English', 'History', 'Politics', 'Philosophy'],
+    whatsapp: '',
+    telegram: '',
+    bio: 'Exploring FYBA study resources on VISH HUB.',
+    avatar: 'portrait',
+    profileComplete: true
+  });
+
+  const emitState = () => {
+    document.body.dataset.authReady = 'true';
+    const hasAccess = Boolean(currentUser || guestMode);
+    document.body.dataset.authUser = hasAccess ? 'true' : 'false';
+    const appEl = document.getElementById('appContent');
+    if (appEl && hasAccess) appEl.removeAttribute('inert');
+    const profilePage = document.getElementById('studentProfilePage');
+    const profileScrim = document.getElementById('profileScrim');
+    if (hasAccess && profilePage && profileScrim) {
+      profilePage.classList.remove('open');
+      profileScrim.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    const detail = currentUser ? {
+      user: currentUser,
+      profile: getProfileForUid(currentUser.uid),
+      profileComplete: Boolean(getProfileForUid(currentUser.uid)?.profileComplete),
+      guest: false,
+      progress: { focus: readJson('vishHubFocusV1:' + currentUser.uid, { goal: 3, days: {} }) }
+    } : {
+      user: null,
+      guest: guestMode,
+      guestProfile: readJson('vishHubGuestProfileV1', {
+        name: 'FYBA Scholar',
+        course: 'FYBA · First Year',
+        studentClass: 'FYBA',
+        division: 'A',
+        subjects: ['Psychology', 'Economics', 'English'],
+        profileComplete: true
+      }),
+      progress: { focus: readJson('vishHubFocusV1:guest', { goal: 3, days: {} }) }
+    };
+    window.dispatchEvent(new CustomEvent('vishhub-auth-state', { detail }));
+  };
+
+  window.vishHubAuth = {
+    isSignedIn: () => Boolean(currentUser),
+    isGuest: () => Boolean(!currentUser && guestMode),
+    getCurrentProfile: () => currentUser ? {
+      user: currentUser,
+      profile: getProfileForUid(currentUser.uid),
+      profileComplete: Boolean(getProfileForUid(currentUser.uid)?.profileComplete)
+    } : null,
+    saveProfile: async (profile) => {
+      const uid = currentUser?.uid || 'guest';
+      const updated = { ...profile, profileComplete: true, updatedAt: new Date().toISOString() };
+      if (currentUser) {
+        currentUser.displayName = updated.name || currentUser.displayName;
+        writeJson(AUTH_KEY, currentUser);
+        writeJson('vishHubProfileV1:' + uid, updated);
+      } else {
+        writeJson('vishHubGuestProfileV1', updated);
+      }
+      emitState();
+      return updated;
+    },
+    continueAsGuest: () => {
+      currentUser = null;
+      guestMode = true;
+      try { localStorage.removeItem(AUTH_KEY); localStorage.setItem('vishHubGuestModeV1', 'true'); } catch {}
+      emitState();
+    },
+    signOut: async () => {
+      currentUser = null;
+      guestMode = true;
+      try { localStorage.removeItem(AUTH_KEY); localStorage.setItem('vishHubGuestModeV1', 'true'); } catch {}
+      emitState();
+    }
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.auth-password-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.passwordTarget);
+        if (!input) return;
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.textContent = show ? 'Hide' : 'Show';
+      });
+    });
+    const form = document.getElementById('profileAuthForm');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('authEmail')?.value?.trim() || 'student@vishhub.edu';
+      const name = document.getElementById('authName')?.value?.trim() || email.split('@')[0] || 'Student';
+      const course = document.getElementById('authCourse')?.value?.trim() || 'FYBA · First Year';
+      const uid = 'usr_' + email.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      currentUser = { uid, email, displayName: name };
+      guestMode = false;
+      writeJson(AUTH_KEY, currentUser);
+      rememberLocalUser(currentUser);
+      const existing = readJson('vishHubProfileV1:' + uid, null);
+      if (!existing) {
+        writeJson('vishHubProfileV1:' + uid, {
+          name,
+          course,
+          studentClass: 'FYBA',
+          division: 'A',
+          subjects: ['Psychology', 'Economics', 'English', 'History'],
+          profileComplete: true
+        });
+      }
+      emitState();
+      window.dispatchEvent(new CustomEvent('vishhub-account-created', { detail: { name } }));
+    });
+    ['googleSignInButton', 'googleSignInInlineButton'].forEach(id => {
+      document.getElementById(id)?.addEventListener('click', () => {
+        currentUser = { uid: 'usr_google_scholar', email: 'scholar@vishhub.edu', displayName: 'FYBA Scholar' };
+        guestMode = false;
+        writeJson(AUTH_KEY, currentUser);
+        rememberLocalUser(currentUser);
+        emitState();
+        window.dispatchEvent(new CustomEvent('vishhub-action-notice', { detail: { message: 'Signed in with Google account.' } }));
+      });
+    });
+    setTimeout(emitState, 60);
+  });
+})();
+</script><style id="firebase-auth-controls">
 #studentProfilePage .auth-divider{display:flex;align-items:center;gap:12px;margin:2px 0;color:#8590a0;font-size:10px;font-weight:700}
 #studentProfilePage .auth-divider:before,#studentProfilePage .auth-divider:after{content:"";height:1px;flex:1;background:#e3dfd2}
 #studentProfilePage .google-auth-button{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:45px;padding:0 15px;border:1px solid #d9dfe7;border-radius:999px;background:#fff;color:#17365d;font:700 12px var(--sans,Arial,sans-serif);cursor:pointer;box-shadow:0 3px 10px #10294b0b}
@@ -5289,58 +5447,2136 @@ body.profile-photo-crop-open{overflow:hidden!important}
 #homeProfileOpen:hover .home-profile-action{filter:brightness(1.06)!important;box-shadow:0 10px 18px #030b1d55,inset 0 1px 0 #fff!important}
 @media(max-width:360px){#homeProfileOpen{padding:12px!important}.home-profile-identity{grid-template-columns:58px minmax(0,1fr)!important;gap:10px!important}#homeProfileAvatar{width:58px!important;height:58px!important;border-radius:15px!important}.home-profile-copy strong{font-size:17px!important}.home-profile-summary{margin-top:10px!important;padding:8px!important}}
 </style>
+
+<!-- Admin panel is available at /vishadmin. -->
+<style id="firebase-admin-gate-style">.admin-auth-gate{position:fixed;z-index:120;inset:0;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at 50% 0%,#d4af3724,transparent 48%),linear-gradient(145deg,#0d2141,#193a65 55%,#10294b);color:#172f52}.admin-auth-gate[hidden]{display:none!important}.admin-auth-card{width:min(100%,420px);padding:28px;border:1px solid #d5b85c;border-radius:22px;background:linear-gradient(145deg,#fff,#f6f4ec);box-shadow:0 25px 75px #0006}.admin-auth-brand{color:#a38232;font-size:10px;font-weight:700;letter-spacing:.2em}.admin-auth-card h1{margin:8px 0;color:#142e52;font:600 27px Georgia,serif}.admin-auth-card p{color:#68778c;font-size:12px;line-height:1.55}.admin-auth-card label{display:grid;gap:6px;margin:14px 0;color:#243d5a;font-size:11px;font-weight:650}.admin-auth-card input{height:44px;padding:0 12px;border:1px solid #d9d1bd;border-radius:10px;background:white;color:#10294b;font:14px Arial,sans-serif}.admin-auth-card button{width:100%;height:44px;margin-top:8px;border:1px solid #f0d98f;border-radius:999px;background:linear-gradient(115deg,#f4e2a7,#c6a348);color:#10294b;font-weight:700;cursor:pointer}.admin-auth-status{min-height:18px;margin:12px 0 0!important;color:#8a3c35!important;font-size:11px!important}.admin-auth-status:empty{display:none}</style>
+<section class="admin-auth-gate" id="adminAuthGate" hidden aria-labelledby="adminAuthTitle"><div class="admin-auth-card"><span class="admin-auth-brand">VISH HUB · ADMIN ACCESS</span><h1 id="adminAuthTitle">Admin sign in</h1><p>Sign in with the authorized Firebase account to continue.</p><form id="adminAuthForm"><label>Email address<input id="adminAuthEmail" type="email" value="shrivishaljadhav@gmail.com" autocomplete="username" readonly></label><label>Password<input id="adminAuthPassword" type="password" autocomplete="current-password" required></label><button id="adminAuthSubmit" type="submit">Continue to Admin Panel</button><p class="admin-auth-status" id="adminAuthStatus" role="status" aria-live="polite"></p></form></div></section>
+<section class="admin-panel-page" id="adminPanelPage" role="dialog" aria-modal="true" aria-labelledby="adminPanelTitle" hidden>
+  <div class="admin-shell">
+    <!-- Sidebar / Top Navigation -->
+    <aside class="admin-sidebar" aria-label="Admin sections">
+      <div class="admin-brand">
+        <div class="admin-brand-crest" aria-hidden="true">VH</div>
+        <div class="admin-brand-copy">
+          <span>VISH HUB · STUDIO</span>
+          <strong id="adminPanelTitle">Admin Panel</strong>
+        </div>
+        <button type="button" class="admin-exit-mobile" id="adminExitMobileBtn" aria-label="Return to Student View">← Student App</button>
+      </div>
+
+      <div class="admin-sync-badge" id="adminSyncBadge" role="status" aria-live="polite">
+        <span class="sync-dot" aria-hidden="true"></span>
+        <span id="adminSyncText">Live sync active · Local storage</span>
+      </div>
+
+      <nav class="admin-nav" id="adminNavTabs" aria-label="Admin modules">
+        <button type="button" class="admin-nav-btn active" data-admin-tab="overview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Overview</span>
+          <b id="navBadgeOverview">10</b>
+        </button>
+        <button type="button" class="admin-nav-btn" data-admin-tab="subjects">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M8 7h8m-8 4h6"/></svg>
+          <span>Subjects</span>
+          <b id="navBadgeSubjects">10</b>
+        </button>
+        <button type="button" class="admin-nav-btn" data-admin-tab="resources">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5M8 13h8m-8 4h5"/></svg>
+          <span>Study PDFs &amp; Books</span>
+          <b id="navBadgeResources">0</b>
+        </button>
+        <button type="button" class="admin-nav-btn" data-admin-tab="videos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg>
+          <span>Video Lectures</span>
+          <b id="navBadgeVideos">0</b>
+        </button>
+        <button type="button" class="admin-nav-btn" data-admin-tab="syllabus">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20z"/><path d="M14 3.5V8h4M9 12h6m-6 3.5h6"/></svg>
+          <span>Syllabus &amp; Units</span>
+          <b id="navBadgeSyllabus">0</b>
+        </button>
+        <button type="button" class="admin-nav-btn" data-admin-tab="practice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Flashcards &amp; Quizzes</span>
+          <b id="navBadgePractice">0</b>
+        </button>
+        <button type="button" class="admin-nav-btn" data-admin-tab="notices">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11v2a2 2 0 0 0 2 2h2l9 4V5l-9 4H5a2 2 0 0 0-2 2Z"/><path d="M20 9a5 5 0 0 1 0 6"/></svg>
+          <span>Notices &amp; Alerts</span>
+          <b id="navBadgeNotices">0</b>
+        </button>
+        <button type="button" class="admin-nav-btn" data-admin-tab="users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5a6.5 6.5 0 0 1 13 0V20zM16 5a3.5 3.5 0 0 1 0 6.8M18 14a5.5 5.5 0 0 1 3.5 5.3V20"/></svg><span>Users &amp; Analytics</span><b id="navBadgeUsers">0</b></button>
+        <button type="button" class="admin-nav-btn" data-admin-tab="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          <span>Student Logs &amp; Backup</span>
+        </button>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        <button type="button" class="admin-return-btn" id="closeAdminPanelBtn">
+          <span>← Return to Student Hub</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <div class="admin-main">
+      <header class="admin-topbar">
+        <div class="admin-topbar-titles">
+          <span class="admin-kicker" id="adminSectionKicker">VISH HUB · ACADEMIC OPERATIONS</span>
+          <h2 id="adminSectionHeading">Executive Overview &amp; Content Matrix</h2>
+        </div>
+        <div class="admin-topbar-controls">
+          <label class="admin-global-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.2 4.2"/></svg>
+            <input type="search" id="adminGlobalSearch" placeholder="Filter current view…" aria-label="Filter items in current admin module">
+          </label>
+          <button type="button" class="admin-btn gold" id="adminPrimaryActionBtn">+ Quick Add</button>
+          <button type="button" class="admin-btn outline" id="adminPreviewHubBtn">Preview Student App</button>
+          <button type="button" class="admin-btn outline" id="adminSignOutBtn">Sign out</button>
+        </div>
+      </header>
+
+      <div class="admin-banner" id="adminStatusBanner" hidden role="status" aria-live="polite"></div>
+
+      <div class="admin-content-scroll" id="adminWorkspaceBody"></div>
+    </div>
+  </div>
+
+  <!-- Reusable Admin Modal / Editor Drawer -->
+  <div class="admin-modal-scrim" id="adminModalScrim" hidden>
+    <div class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+      <header class="admin-modal-head">
+        <div>
+          <span class="admin-kicker" id="adminModalKicker">CONTENT EDITOR</span>
+          <h3 id="adminModalTitle">Add Item</h3>
+        </div>
+        <button type="button" class="admin-modal-close" id="closeAdminModalBtn" aria-label="Close modal">×</button>
+      </header>
+      <form id="adminModalForm" class="admin-modal-form"></form>
+    </div>
+  </div>
+</section>
+
+<style id="vish-hub-admin-panel-styles">
+/* Admin Launcher Bar in Student Hub */
+.admin-launcher-bar {
+  position: fixed;
+  z-index: 65;
+  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  right: max(12px, calc((100vw - min(100vw, 1280px)) / 2 + 16px));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 6px 12px;
+  border: 1px solid #d4af37;
+  border-radius: 16px 4px 16px 4px;
+  background: linear-gradient(135deg, #0b1d39f2, #17375ff2);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(7, 20, 43, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(12px);
+}
+body.app-page-open .admin-launcher-bar,
+body.admin-panel-open .admin-launcher-bar {
+  display: none !important;
+}
+.admin-launcher-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.admin-launcher-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f2dfa0;
+  box-shadow: 0 0 0 3px rgba(242, 223, 160, 0.22);
+}
+.admin-launcher-meta strong {
+  display: block;
+  color: #f2dfa0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+.admin-launcher-meta span {
+  display: none;
+  color: #d6e0ee;
+  font-size: 10px;
+}
+@media (min-width: 820px) {
+  .admin-launcher-meta span { display: block; }
+}
+.admin-launcher-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #f0d98e !important;
+  border-radius: 12px 3px 12px 3px !important;
+  background: linear-gradient(120deg, #f5e6b0, #c6a348) !important;
+  color: #10294b !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(2, 11, 28, 0.35) !important;
+}
+.admin-launcher-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Full-Screen Admin Panel Workspace */
+.admin-panel-page[hidden] {
+  display: none !important;
+}
+.admin-panel-page {
+  position: fixed;
+  z-index: 260;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: linear-gradient(150deg, #f5f0e3 0%, #eef2f7 55%, #f7f4eb 100%);
+  color: #10294b;
+}
+.admin-shell {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+}
+.admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: calc(env(safe-area-inset-top, 0px) + 18px) 14px calc(env(safe-area-inset-bottom, 0px) + 16px);
+  border-right: 1px solid #c6a348;
+  background: radial-gradient(ellipse at 90% 0%, rgba(212, 175, 55, 0.22), transparent 42%), linear-gradient(160deg, #081931 0%, #10294b 58%, #0a1e39 100%);
+  color: #fff;
+  overflow-y: auto;
+}
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.32);
+}
+.admin-brand-crest {
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #f0d98e;
+  border-radius: 13px 4px 13px 4px;
+  background: linear-gradient(145deg, #f6e7b4, #c6a348);
+  color: #10294b;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.35);
+}
+.admin-brand-copy {
+  min-width: 0;
+  flex: 1;
+}
+.admin-brand-copy span {
+  display: block;
+  color: #e3c978;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+.admin-brand-copy strong {
+  display: block;
+  margin-top: 2px;
+  color: #fff8e7;
+  font-size: 19px;
+}
+.admin-exit-mobile {
+  display: none;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #e3c978 !important;
+  border-radius: 10px 3px 10px 3px !important;
+  background: linear-gradient(135deg, #f5e6b0, #c6a348) !important;
+  color: #10294b !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+}
+.admin-sync-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 12px 3px 12px 3px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e9eef6;
+  font-size: 10px;
+}
+.admin-sync-badge .sync-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #67d48b;
+  box-shadow: 0 0 0 3px rgba(103, 212, 139, 0.22);
+}
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+.admin-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 11px;
+  border: 1px solid transparent !important;
+  border-radius: 13px 4px 13px 4px !important;
+  background: transparent !important;
+  color: #d6e0ee !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-align: left;
+  cursor: pointer;
+}
+.admin-nav-btn svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  color: #e3c978;
+}
+.admin-nav-btn span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-nav-btn b {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #f2dfa0;
+  font-size: 10px;
+  font-weight: 800;
+}
+.admin-nav-btn:hover {
+  border-color: rgba(212, 175, 55, 0.45) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+.admin-nav-btn.active {
+  border-color: #f0d98e !important;
+  background: linear-gradient(125deg, #f5e6b0, #c6a348) !important;
+  color: #10294b !important;
+  box-shadow: 0 6px 15px rgba(2, 11, 28, 0.4) !important;
+}
+.admin-nav-btn.active svg {
+  color: #10294b;
+}
+.admin-nav-btn.active b {
+  background: #10294b;
+  color: #f2dfa0;
+}
+.admin-sidebar-footer {
+  padding-top: 10px;
+  border-top: 1px solid rgba(212, 175, 55, 0.3);
+}
+.admin-return-btn {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid #d8bd70 !important;
+  border-radius: 13px 4px 13px 4px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #f2dfa0 !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  cursor: pointer;
+}
+.admin-return-btn:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+
+/* Main Admin Area */
+.admin-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100dvh;
+  overflow: hidden;
+}
+.admin-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 22px 14px;
+  border-bottom: 1px solid #dcd0b0;
+  background: linear-gradient(180deg, #fffdf8, #f7f3e6);
+}
+.admin-kicker {
+  display: block;
+  color: #987629;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.admin-topbar-titles h2 {
+  margin: 3px 0 0;
+  color: #10294b;
+  font-size: clamp(18px, 2.4vw, 24px);
+}
+.admin-topbar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.admin-global-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 220px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #d4c082;
+  border-radius: 12px 3px 12px 3px;
+  background: #fff;
+}
+.admin-global-search svg {
+  width: 16px;
+  height: 16px;
+  color: #987629;
+  flex: none;
+}
+.admin-global-search input {
+  width: 100%;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: #10294b !important;
+  font-size: 12px !important;
+}
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #c6a348 !important;
+  border-radius: 12px 3px 12px 3px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  cursor: pointer;
+}
+.admin-btn.gold {
+  background: linear-gradient(120deg, #173a65, #10294b) !important;
+  color: #f2dfa0 !important;
+}
+.admin-btn.outline {
+  background: #fffdf7 !important;
+  color: #10294b !important;
+}
+.admin-btn.danger {
+  border-color: #d68b82 !important;
+  background: #fff2f0 !important;
+  color: #8f2d22 !important;
+}
+.admin-btn.small {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 11px !important;
+}
+.admin-banner {
+  margin: 10px 22px 0;
+  padding: 10px 14px;
+  border: 1px solid #c6a348;
+  border-radius: 12px 3px 12px 3px;
+  background: linear-gradient(120deg, #10294b, #173a65);
+  color: #f2dfa0 !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+.admin-content-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 22px calc(env(safe-area-inset-bottom, 0px) + 36px);
+}
+
+/* Overview KPI Grid & Matrix */
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.admin-kpi-card {
+  position: relative;
+  padding: 15px;
+  border: 1px solid #d8c688;
+  border-radius: 18px 4px 18px 4px;
+  background: linear-gradient(145deg, #fffdf8, #f7f1df);
+  box-shadow: 0 6px 16px rgba(16, 41, 75, 0.08);
+}
+.admin-kpi-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  background: linear-gradient(180deg, #c6a348, #10294b);
+}
+.admin-kpi-card span {
+  display: block;
+  color: #8a6d24;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.admin-kpi-card strong {
+  display: block;
+  margin: 6px 0 4px;
+  color: #10294b;
+  font-size: 26px;
+}
+.admin-kpi-card small {
+  display: block;
+  color: #5b6b82;
+  font-size: 11px;
+}
+.admin-panel-card {
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid #d8c688;
+  border-radius: 18px 4px 18px 4px;
+  background: #fffdf9;
+  box-shadow: 0 6px 18px rgba(16, 41, 75, 0.07);
+}
+.admin-panel-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e6dec6;
+}
+.admin-panel-card-head h3 {
+  margin: 0;
+  color: #10294b;
+  font-size: 17px;
+}
+.admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.admin-filter-bar select,
+.admin-filter-bar input {
+  min-height: 38px;
+  padding: 0 11px;
+  border: 1px solid #d4c082 !important;
+  border-radius: 11px 3px 11px 3px !important;
+  background: #fff !important;
+  color: #10294b !important;
+  font-size: 12px !important;
+}
+.admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.admin-table th,
+.admin-table td {
+  padding: 10px 11px;
+  border-bottom: 1px solid #eae3cf;
+  text-align: left;
+  vertical-align: middle;
+}
+.admin-table th {
+  background: #f5efe0;
+  color: #7c611e;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.admin-table tr:hover td {
+  background: #fdfaf0;
+}
+.admin-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border: 1px solid #d8c584;
+  border-radius: 999px;
+  background: #f8f1dc;
+  color: #72591d;
+  font-size: 10px;
+  font-weight: 800;
+}
+.admin-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.admin-item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 12px;
+}
+.admin-item-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #dfd3b2;
+  border-radius: 16px 4px 16px 4px;
+  background: linear-gradient(145deg, #fff, #f9f6ec);
+  box-shadow: 0 4px 12px rgba(16, 41, 75, 0.06);
+}
+.admin-item-card h4 {
+  margin: 4px 0;
+  color: #10294b;
+  font-size: 14px;
+  line-height: 1.3;
+}
+.admin-item-card p {
+  margin: 0;
+  color: #5b6b82;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.admin-video-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid #c6a348;
+  border-radius: 11px 3px 11px 3px;
+  background: #10294b;
+}
+
+/* Modal Form */
+.admin-modal-scrim[hidden] {
+  display: none !important;
+}
+.admin-modal-scrim {
+  position: fixed;
+  z-index: 280;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(8, 22, 43, 0.72);
+  backdrop-filter: blur(5px);
+}
+.admin-modal {
+  width: min(100%, 560px);
+  max-height: min(90dvh, 760px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #c6a348;
+  border-radius: 22px 5px 22px 5px;
+  background: #fffdf8;
+  box-shadow: 0 24px 70px rgba(4, 12, 26, 0.55);
+}
+.admin-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #c6a348;
+  background: linear-gradient(125deg, #10294b, #173a65);
+  color: #fff;
+}
+.admin-modal-head .admin-kicker {
+  color: #f2dfa0;
+}
+.admin-modal-head h3 {
+  margin: 3px 0 0;
+  color: #fff8e7 !important;
+  font-size: 19px;
+}
+.admin-modal-close {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e3c978 !important;
+  border-radius: 10px 3px 10px 3px !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #f2dfa0 !important;
+  font-size: 22px !important;
+  cursor: pointer;
+}
+.admin-modal-form {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  overflow-y: auto;
+}
+.admin-field {
+  display: grid;
+  gap: 5px;
+  color: #173456;
+  font-size: 11px;
+  font-weight: 800;
+}
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid #d5c48c !important;
+  border-radius: 10px 3px 10px 3px !important;
+  background: #fff !important;
+  color: #10294b !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+.admin-field textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+.admin-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e8dfc8;
+}
+
+@media (max-width: 820px) {
+  .admin-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .admin-sidebar {
+    gap: 8px;
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 10px;
+    border-right: 0;
+    border-bottom: 1px solid #c6a348;
+  }
+  .admin-brand {
+    padding-bottom: 8px;
+  }
+  .admin-exit-mobile {
+    display: inline-flex;
+    align-items: center;
+  }
+  .admin-sync-badge,
+  .admin-sidebar-footer {
+    display: none;
+  }
+  .admin-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .admin-nav::-webkit-scrollbar { display: none; }
+  .admin-nav-btn {
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 38px;
+    padding: 6px 10px;
+  }
+  .admin-topbar {
+    padding: 12px 14px;
+  }
+  .admin-content-scroll {
+    padding: 14px 14px calc(env(safe-area-inset-bottom, 0px) + 28px);
+  }
+}
+
+.admin-user-scope{display:flex;gap:10px;align-items:flex-start;margin:0 0 16px;padding:13px 15px;border:1px solid #d8c27d;border-radius:12px;background:#fbf7e9;color:#4e6077;font-size:11px;line-height:1.5}.admin-user-scope strong{flex:none;color:#765e20}.admin-user-scope span{min-width:0}
+@media(max-width:600px){.admin-user-scope{display:grid;gap:3px}}
+</style>
+
+<script id="vish-hub-admin-panel-script">
+(() => {
+  const ADMIN_STORAGE_KEY = 'vishHubAdminStateV1';
+  const NOTIFICATIONS_STORAGE_KEY = 'vishHubAdminNotificationsV1';
+  let currentTab = 'overview';
+  let filterSubject = 'all';
+  let filterType = 'all';
+  let filterPracticeMode = 'flashcards';
+  let pendingDeleteKey = null;
+
+  const escHtml = (v) => {
+    const d = document.createElement('div');
+    d.textContent = String(v ?? '');
+    return d.innerHTML;
+  };
+
+  const normalizeDriveUrl = (url) => {
+    const raw = String(url || '').trim();
+    if (!raw) return '';
+    const match = raw.match(/\/file\/d\/([^/]+)/) || raw.match(/[?&]id=([^&]+)/);
+    if (match && match[1]) {
+      return 'https://drive.google.com/file/d/' + match[1] + '/preview';
+    }
+    return raw;
+  };
+
+  const getBridge = () => window.vishHubAdminBridge || null;
+  const getNoticesBridge = () => window.vishHubNoticesBridge || null;
+
+  const getNotificationItems = () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(NOTIFICATIONS_STORAGE_KEY) || 'null');
+      if (Array.isArray(saved) && saved.length) return saved;
+    } catch {}
+    return [
+      { id: 'notif-1', tag: 'EXAM TIMETABLE', title: 'Mid-sem timetable is available', message: 'View exam dates and papers for FYBA.', target: 'timetable' },
+      { id: 'notif-2', tag: 'STUDY MATERIALS', title: 'Study resources are ready', message: 'Browse notes, question banks and answer keys by subject.', target: 'subjects' }
+    ];
+  };
+
+  const syncDomNotifications = (items) => {
+    try { localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(items)); } catch {}
+    const listEl = document.getElementById('notificationList');
+    if (!listEl) return;
+    listEl.innerHTML = items.map(item => `
+      <button type="button" class="notification-item" data-notification="${escHtml(item.target || 'subjects')}">
+        <span class="notification-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg></span>
+        <span class="notification-copy"><strong>${escHtml(item.title)}</strong><span>${escHtml(item.message)}</span><small>${escHtml(item.tag || 'STUDENT UPDATE')}</small></span>
+        <i class="notification-unread"></i>
+      </button>
+    `).join('');
+    listEl.querySelectorAll('[data-notification]').forEach(btn => {
+      btn.onclick = () => {
+        document.getElementById('closeNotifications')?.click();
+        document.querySelector('.navitem[data-nav=subjects]')?.click();
+      };
+    });
+  };
+
+  // Save & Load full Admin Overrides to localStorage
+  const saveAdminSnapshot = (bannerMsg = '') => {
+    const b = getBridge();
+    if (!b) return;
+    const nb = getNoticesBridge();
+    const snapshot = {
+      updatedAt: new Date().toISOString(),
+      subjects: b.subjects.map(s => ({
+        id: s.id,
+        name: s.name,
+        badge: s.badge,
+        tone: s.tone,
+        desc: s.desc,
+        notes: s.notes || [],
+        videos: s.videos || [],
+        resources: (s.resources || []).map(r => ({
+          type: r.type,
+          title: r.title,
+          driveUrl: r.driveUrl,
+          fileName: r.fileName,
+          extracted: r.extracted
+        }))
+      })),
+      additionalSyllabi: b.additionalSyllabi,
+      studyData: b.studyData,
+      quizBankData: b.quizBankData,
+      notices: nb?.notices || [],
+      notifications: getNotificationItems()
+    };
+    try {
+      localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(snapshot));
+    } catch {}
+    refreshStudentAppViews();
+    updateSidebarBadges();
+    if (bannerMsg) showAdminBanner(bannerMsg);
+  };
+
+  const applySavedAdminSnapshot = () => {
+    const b = getBridge();
+    if (!b) return;
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(ADMIN_STORAGE_KEY) || 'null'); } catch {}
+    if (!saved) {
+      syncDomNotifications(getNotificationItems());
+      updateSidebarBadges();
+      return;
+    }
+    if (Array.isArray(saved.subjects)) {
+      saved.subjects.forEach(savedSub => {
+        const existing = b.subjects.find(s => s.id === savedSub.id);
+        if (existing) {
+          existing.name = savedSub.name;
+          existing.badge = savedSub.badge;
+          existing.tone = savedSub.tone;
+          existing.desc = savedSub.desc;
+          existing.notes = Array.isArray(savedSub.notes) ? savedSub.notes : [];
+          existing.videos = Array.isArray(savedSub.videos) ? savedSub.videos : [];
+          existing.resources = Array.isArray(savedSub.resources) ? savedSub.resources : [];
+          b.suppliedResources[existing.id] = existing.resources;
+        } else {
+          b.subjects.push(savedSub);
+          b.suppliedResources[savedSub.id] = savedSub.resources || [];
+        }
+      });
+    }
+    if (Array.isArray(saved.additionalSyllabi)) {
+      b.additionalSyllabi.splice(0, b.additionalSyllabi.length, ...saved.additionalSyllabi);
+    }
+    if (saved.studyData && typeof saved.studyData === 'object') {
+      Object.keys(b.studyData).forEach(k => delete b.studyData[k]);
+      Object.assign(b.studyData, saved.studyData);
+    }
+    if (saved.quizBankData && typeof saved.quizBankData === 'object') {
+      Object.keys(b.quizBankData).forEach(k => delete b.quizBankData[k]);
+      Object.assign(b.quizBankData, saved.quizBankData);
+    }
+    const nb = getNoticesBridge();
+    if (nb && Array.isArray(saved.notices) && saved.notices.length) {
+      nb.notices.splice(0, nb.notices.length, ...saved.notices);
+      nb.renderNotice?.();
+    }
+    if (Array.isArray(saved.notifications)) {
+      syncDomNotifications(saved.notifications);
+    }
+    refreshStudentAppViews();
+    updateSidebarBadges();
+  };
+
+  window.vishHubSyncAdminData = applySavedAdminSnapshot;
+
+  const refreshStudentAppViews = () => {
+    const b = getBridge();
+    if (!b) return;
+    try { b.renderGrid?.(); } catch {}
+    try { b.renderVideoLibrary?.(); } catch {}
+    try { b.renderSyllabusPage?.(); } catch {}
+    try { if (document.getElementById('sheet')?.classList.contains('open')) b.renderPanel?.(); } catch {}
+    const nb = getNoticesBridge();
+    try { nb?.renderNotice?.(); } catch {}
+  };
+
+  const computeMetrics = () => {
+    const b = getBridge();
+    if (!b) return { subjects: 0, resources: 0, videos: 0, syllabi: 0, flashcards: 0, quizQuestions: 0, notices: 0, attempts: 0 };
+    const resourcesCount = b.subjects.reduce((acc, s) => acc + (s.resources || []).filter(r => r.type !== 'Syllabus').length, 0);
+    const videosCount = b.subjects.reduce((acc, s) => acc + (s.videos || []).length, 0);
+    const syllabiCount = b.subjects.reduce((acc, s) => acc + (s.resources || []).filter(r => r.type === 'Syllabus').length, 0) + (b.additionalSyllabi || []).length;
+    const flashcardsCount = Object.values(b.studyData || {}).reduce((acc, majors) => {
+      return acc + (Array.isArray(majors) ? majors.reduce((mAcc, m) => mAcc + (m.units || []).reduce((uAcc, u) => uAcc + (u.cards || []).length, 0), 0) : 0);
+    }, 0);
+    const quizQuestionsCount = Object.values(b.quizBankData || {}).reduce((acc, sections) => {
+      return acc + (Array.isArray(sections) ? sections.reduce((sAcc, sec) => sAcc + (sec.questions || []).length, 0) : 0);
+    }, 0);
+    const noticesCount = (getNoticesBridge()?.notices?.length || 0) + getNotificationItems().length;
+    let attemptsCount = 0;
+    try {
+      const scores = JSON.parse(localStorage.getItem('vishHubQuizScoreboardV1:guest') || '[]');
+      if (Array.isArray(scores)) attemptsCount = scores.length;
+    } catch {}
+    return {
+      subjects: b.subjects.length,
+      resources: resourcesCount,
+      videos: videosCount,
+      syllabi: syllabiCount,
+      flashcards: flashcardsCount,
+      quizQuestions: quizQuestionsCount,
+      notices: noticesCount,
+      attempts: attemptsCount
+    };
+  };
+
+  const updateSidebarBadges = () => {
+    const m = computeMetrics();
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = String(val); };
+    set('navBadgeOverview', m.subjects);
+    set('navBadgeSubjects', m.subjects);
+    set('navBadgeResources', m.resources);
+    set('navBadgeVideos', m.videos);
+    set('navBadgeSyllabus', m.syllabi);
+    set('navBadgePractice', m.flashcards + m.quizQuestions);
+    set('navBadgeNotices', m.notices);
+    try { const users = JSON.parse(localStorage.getItem('vishHubLocalAccountsV1') || '[]'); set('navBadgeUsers', Array.isArray(users) ? users.length : 0); } catch { set('navBadgeUsers', 0); }
+  };
+
+  let bannerTimer = null;
+  const showAdminBanner = (msg) => {
+    const banner = document.getElementById('adminStatusBanner');
+    if (!banner) return;
+    banner.textContent = msg;
+    banner.hidden = false;
+    clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => { banner.hidden = true; }, 3400);
+    getBridge()?.showToast?.(msg);
+  };
+
+  // Section Titles & Primary Actions
+  const sectionConfig = {
+    overview: { kicker: 'VISH HUB · ACADEMIC OPERATIONS', title: 'Executive Overview & Content Matrix', action: '+ Add Resource', onAction: () => openResourceModal() },
+    subjects: { kicker: 'CURRICULUM DIRECTORY', title: 'Subjects & Collections Manager', action: '+ Add Subject', onAction: () => openSubjectModal() },
+    resources: { kicker: 'LIBRARY REPOSITORY', title: 'Study PDFs, Books, Notes & Answer Keys', action: '+ Add PDF / Book', onAction: () => openResourceModal() },
+    videos: { kicker: 'YOUTUBE LECTURE STUDIO', title: 'Video Lectures Manager', action: '+ Add Video Lecture', onAction: () => openVideoModal() },
+    syllabus: { kicker: 'COURSE OUTLINES & UNITS', title: 'Syllabus & Unit Topics Manager', action: '+ Add Course Syllabus', onAction: () => openSyllabusModal() },
+    practice: { kicker: 'ACTIVE RECALL ENGINE', title: 'Flashcards & MCQ Quiz Bank Manager', action: '+ Add Recall Item', onAction: () => filterPracticeMode === 'quiz' ? openQuizModal() : openFlashcardModal() },
+    notices: { kicker: 'CAMPUS COMMUNICATIONS', title: 'Rotating Notices & Student Notifications', action: '+ Post Notice', onAction: () => openNoticeModal() },
+    users: { kicker: 'STUDENT DIRECTORY', title: 'User Analytics & Controls', action: 'Refresh User Analytics', onAction: () => renderCurrentAdminTab() },
+    settings: { kicker: 'SYSTEM & TELEMETRY', title: 'Student Activity Logs, Backup & Restore', action: 'Export JSON Backup', onAction: () => exportAdminJson() }
+  };
+
+  const switchAdminTab = (tab) => {
+    currentTab = sectionConfig[tab] ? tab : 'overview';
+    pendingDeleteKey = null;
+    document.querySelectorAll('#adminNavTabs [data-admin-tab]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.adminTab === currentTab);
+    });
+    const cfg = sectionConfig[currentTab];
+    document.getElementById('adminSectionKicker').textContent = cfg.kicker;
+    document.getElementById('adminSectionHeading').textContent = cfg.title;
+    const primaryBtn = document.getElementById('adminPrimaryActionBtn');
+    primaryBtn.textContent = cfg.action;
+    primaryBtn.onclick = cfg.onAction;
+    renderCurrentAdminTab();
+  };
+
+  let routeBeforeAdmin = '';
+  const isAdminRoute = () => location.pathname.replace(/\/+$/, '') === '/vishadmin';
+  const openAdminPanel = (tab = 'overview', fromRoute = false) => {
+    if (!isAdminRoute()) {
+      routeBeforeAdmin = location.pathname + location.search + location.hash;
+      try { history.pushState({ vishHubAdminRoute: true }, '', '/vishadmin'); } catch {}
+    }
+    applySavedAdminSnapshot();
+    const page = document.getElementById('adminPanelPage');
+    page.hidden = false;
+    document.body.classList.add('admin-panel-open');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('headerMenu')?.setAttribute('hidden', '');
+    document.getElementById('menuToggle')?.setAttribute('aria-expanded', 'false');
+    switchAdminTab(tab);
+  };
+
+  const closeAdminPanel = () => {
+    if (isAdminRoute()) {
+      const destination = routeBeforeAdmin || '/';
+      try { history.replaceState({}, '', destination); } catch {}
+      routeBeforeAdmin = '';
+    }
+    const page = document.getElementById('adminPanelPage');
+    page.hidden = true;
+    document.body.classList.remove('admin-panel-open');
+    document.body.style.overflow = '';
+    refreshStudentAppViews();
+  };
+
+  // Renderers for each tab
+  const renderCurrentAdminTab = () => {
+    const b = getBridge();
+    const container = document.getElementById('adminWorkspaceBody');
+    if (!b || !container) return;
+    const q = (document.getElementById('adminGlobalSearch')?.value || '').trim().toLowerCase();
+    updateSidebarBadges();
+
+    if (currentTab === 'overview') {
+      const m = computeMetrics();
+      const rows = b.subjects.map(s => {
+        const resList = s.resources || [];
+        const books = resList.filter(r => r.type === 'Textbooks' || r.type === 'Books').length;
+        const notes = resList.filter(r => r.type === 'Study Notes' || r.type === 'Short Notes').length;
+        const qbanks = resList.filter(r => r.type === 'Question Banks' || r.type === 'Question Bank').length;
+        const keys = resList.filter(r => r.type === 'Answer Keys' || r.type === 'Answer Key').length;
+        const vids = (s.videos || []).length;
+        const syl = resList.filter(r => r.type === 'Syllabus').length + b.additionalSyllabi.filter(a => a.subject === s.name).length;
+        const cards = (b.studyData[s.id] || []).reduce((acc, mj) => acc + (mj.units || []).reduce((uA, u) => uA + (u.cards || []).length, 0), 0);
+        const mcqs = (b.quizBankData[s.id] || []).reduce((acc, sec) => acc + (sec.questions || []).length, 0);
+        return { s, books, notes, qbanks, keys, vids, syl, cards, mcqs };
+      }).filter(r => !q || r.s.name.toLowerCase().includes(q) || r.s.desc.toLowerCase().includes(q));
+
+      container.innerHTML = `
+        <div class="admin-kpi-grid">
+          <article class="admin-kpi-card"><span>Subjects &amp; Desks</span><strong>${m.subjects}</strong><small>Main, SEC, OE &amp; Common</small></article>
+          <article class="admin-kpi-card"><span>Study PDFs &amp; Books</span><strong>${m.resources}</strong><small>Books, Notes, QBanks &amp; Keys</small></article>
+          <article class="admin-kpi-card"><span>Video Lectures</span><strong>${m.videos}</strong><small>Curated YouTube lessons</small></article>
+          <article class="admin-kpi-card"><span>Syllabus Outlines</span><strong>${m.syllabi}</strong><small>Extracted units &amp; topics</small></article>
+          <article class="admin-kpi-card"><span>Flashcards</span><strong>${m.flashcards}</strong><small>Active recall Q&amp;A cards</small></article>
+          <article class="admin-kpi-card"><span>Quiz Arena MCQs</span><strong>${m.quizQuestions}</strong><small>Auto-graded practice items</small></article>
+        </div>
+
+        <section class="admin-panel-card">
+          <div class="admin-panel-card-head">
+            <div>
+              <span class="admin-kicker">LIVE CONTENT COVERAGE MATRIX</span>
+              <h3>Subject Readiness &amp; Resource Inventory</h3>
+            </div>
+            <div class="admin-row-actions">
+              <button type="button" class="admin-btn small outline" data-jump-tab="resources">Manage PDFs</button>
+              <button type="button" class="admin-btn small outline" data-jump-tab="videos">Manage Videos</button>
+              <button type="button" class="admin-btn small outline" data-jump-tab="practice">Manage Quizzes</button>
+            </div>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Books</th>
+                  <th>Notes</th>
+                  <th>Q. Banks</th>
+                  <th>Answer Keys</th>
+                  <th>Syllabi</th>
+                  <th>Videos</th>
+                  <th>Flashcards</th>
+                  <th>Quiz MCQs</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map(r => `
+                  <tr>
+                    <td><strong>${escHtml(r.s.name)}</strong><br><small style="color:#69788c">${escHtml(r.s.badge)}</small></td>
+                    <td><span class="admin-pill">${r.books}</span></td>
+                    <td><span class="admin-pill">${r.notes}</span></td>
+                    <td><span class="admin-pill">${r.qbanks}</span></td>
+                    <td><span class="admin-pill">${r.keys}</span></td>
+                    <td><span class="admin-pill">${r.syl}</span></td>
+                    <td><span class="admin-pill">${r.vids}</span></td>
+                    <td><span class="admin-pill">${r.cards}</span></td>
+                    <td><span class="admin-pill">${r.mcqs}</span></td>
+                    <td>
+                      <div class="admin-row-actions">
+                        <button type="button" class="admin-btn small outline" data-matrix-res="${escHtml(r.s.id)}">Resources</button>
+                        <button type="button" class="admin-btn small gold" data-matrix-open="${escHtml(r.s.id)}">View Desk</button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      `;
+
+      container.querySelectorAll('[data-jump-tab]').forEach(btn => {
+        btn.onclick = () => switchAdminTab(btn.dataset.jumpTab);
+      });
+      container.querySelectorAll('[data-matrix-res]').forEach(btn => {
+        btn.onclick = () => {
+          filterSubject = btn.dataset.matrixRes;
+          switchAdminTab('resources');
+        };
+      });
+      container.querySelectorAll('[data-matrix-open]').forEach(btn => {
+        btn.onclick = () => {
+          const sub = b.subjects.find(s => s.id === btn.dataset.matrixOpen);
+          if (sub) {
+            closeAdminPanel();
+            b.openSubject?.(sub);
+          }
+        };
+      });
+      return;
+    }
+
+    if (currentTab === 'subjects') {
+      const list = b.subjects.filter(s => !q || s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q) || s.badge.toLowerCase().includes(q));
+      container.innerHTML = `
+        <div class="admin-item-grid">
+          ${list.map((s, idx) => `
+            <article class="admin-item-card">
+              <div>
+                <span class="admin-pill">${escHtml(s.badge || 'Study Resources')}</span>
+                <h4>${escHtml(s.name)}</h4>
+                <p>${escHtml(s.desc)}</p>
+              </div>
+              <div class="admin-row-actions">
+                <button type="button" class="admin-btn small outline" data-edit-subject="${escHtml(s.id)}">Edit Details</button>
+                <button type="button" class="admin-btn small outline" data-manage-sub-res="${escHtml(s.id)}">PDFs (${(s.resources || []).length})</button>
+                <button type="button" class="admin-btn small gold" data-open-sub-desk="${escHtml(s.id)}">Open in App</button>
+              </div>
+            </article>
+          `).join('')}
+        </div>
+      `;
+      container.querySelectorAll('[data-edit-subject]').forEach(btn => {
+        btn.onclick = () => openSubjectModal(btn.dataset.editSubject);
+      });
+      container.querySelectorAll('[data-manage-sub-res]').forEach(btn => {
+        btn.onclick = () => { filterSubject = btn.dataset.manageSubRes; switchAdminTab('resources'); };
+      });
+      container.querySelectorAll('[data-open-sub-desk]').forEach(btn => {
+        btn.onclick = () => {
+          const sub = b.subjects.find(s => s.id === btn.dataset.openSubDesk);
+          if (sub) { closeAdminPanel(); b.openSubject?.(sub); }
+        };
+      });
+      return;
+    }
+
+    if (currentTab === 'resources') {
+      const allRes = [];
+      b.subjects.forEach(s => {
+        (s.resources || []).forEach((r, idx) => {
+          if (r.type === 'Syllabus') return;
+          allRes.push({ subjectId: s.id, subjectName: s.name, resource: r, index: idx });
+        });
+      });
+      const filtered = allRes.filter(item => {
+        if (filterSubject !== 'all' && item.subjectId !== filterSubject) return false;
+        if (filterType !== 'all' && item.resource.type !== filterType) return false;
+        if (q && ![item.subjectName, item.resource.title, item.resource.type, item.resource.fileName].join(' ').toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      container.innerHTML = `
+        <div class="admin-filter-bar">
+          <select id="adminResSubjectFilter" aria-label="Filter by subject">
+            <option value="all">All Subjects</option>
+            ${b.subjects.map(s => `<option value="${escHtml(s.id)}" ${filterSubject === s.id ? 'selected' : ''}>${escHtml(s.name)}</option>`).join('')}
+          </select>
+          <select id="adminResTypeFilter" aria-label="Filter by resource type">
+            <option value="all">All Resource Types</option>
+            ${['Textbooks', 'Books', 'Study Notes', 'Question Banks', 'Answer Keys'].map(t => `<option value="${t}" ${filterType === t ? 'selected' : ''}>${t}</option>`).join('')}
+          </select>
+          <button type="button" class="admin-btn small gold" id="addResInlineBtn">+ Add Study PDF / Book</button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Category</th>
+                <th>Resource Title</th>
+                <th>File Name</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.length ? filtered.map(item => {
+                const delKey = `res-${item.subjectId}-${item.index}`;
+                return `
+                  <tr>
+                    <td><strong>${escHtml(item.subjectName)}</strong></td>
+                    <td><span class="admin-pill">${escHtml(item.resource.type)}</span></td>
+                    <td><strong>${escHtml(item.resource.title)}</strong></td>
+                    <td><small style="color:#657488">${escHtml(item.resource.fileName || 'PDF Document')}</small></td>
+                    <td>
+                      <div class="admin-row-actions">
+                        <button type="button" class="admin-btn small outline" data-preview-res="${escHtml(item.subjectId)}:${item.index}">Preview</button>
+                        <button type="button" class="admin-btn small outline" data-edit-res="${escHtml(item.subjectId)}:${item.index}">Edit</button>
+                        <button type="button" class="admin-btn small danger" data-del-res="${escHtml(item.subjectId)}:${item.index}">${pendingDeleteKey === delKey ? 'Confirm Delete?' : 'Delete'}</button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join('') : `<tr><td colspan="5" style="text-align:center;padding:24px;color:#68778c">No study resources match the current filter.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.querySelector('#adminResSubjectFilter').onchange = (e) => { filterSubject = e.target.value; renderCurrentAdminTab(); };
+      container.querySelector('#adminResTypeFilter').onchange = (e) => { filterType = e.target.value; renderCurrentAdminTab(); };
+      container.querySelector('#addResInlineBtn').onclick = () => openResourceModal();
+      container.querySelectorAll('[data-preview-res]').forEach(btn => {
+        btn.onclick = () => {
+          const [subId, idx] = btn.dataset.previewRes.split(':');
+          const sub = b.subjects.find(s => s.id === subId);
+          const res = sub?.resources?.[Number(idx)];
+          if (res) { closeAdminPanel(); b.openResource?.(res); }
+        };
+      });
+      container.querySelectorAll('[data-edit-res]').forEach(btn => {
+        btn.onclick = () => {
+          const [subId, idx] = btn.dataset.editRes.split(':');
+          openResourceModal(subId, Number(idx));
+        };
+      });
+      container.querySelectorAll('[data-del-res]').forEach(btn => {
+        btn.onclick = () => {
+          const [subId, idx] = btn.dataset.delRes.split(':');
+          const delKey = `res-${subId}-${idx}`;
+          if (pendingDeleteKey !== delKey) {
+            pendingDeleteKey = delKey;
+            renderCurrentAdminTab();
+            return;
+          }
+          const sub = b.subjects.find(s => s.id === subId);
+          if (sub && sub.resources) {
+            sub.resources.splice(Number(idx), 1);
+            pendingDeleteKey = null;
+            saveAdminSnapshot('Study resource removed.');
+            renderCurrentAdminTab();
+          }
+        };
+      });
+      return;
+    }
+
+    if (currentTab === 'videos') {
+      const allVids = [];
+      b.subjects.forEach(s => {
+        (s.videos || []).forEach((v, idx) => {
+          allVids.push({ subjectId: s.id, subjectName: s.name, video: v, index: idx });
+        });
+      });
+      const filtered = allVids.filter(item => {
+        if (filterSubject !== 'all' && item.subjectId !== filterSubject) return false;
+        if (q && ![item.subjectName, item.video.title, item.video.major, item.video.unit, item.video.channel].join(' ').toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      const ytThumb = (url) => {
+        const m = String(url || '').match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/);
+        return m ? `https://i.ytimg.com/vi/${m[1]}/hqdefault.jpg` : '';
+      };
+
+      container.innerHTML = `
+        <div class="admin-filter-bar">
+          <select id="adminVidSubjectFilter" aria-label="Filter videos by subject">
+            <option value="all">All Subjects</option>
+            ${b.subjects.map(s => `<option value="${escHtml(s.id)}" ${filterSubject === s.id ? 'selected' : ''}>${escHtml(s.name)}</option>`).join('')}
+          </select>
+          <button type="button" class="admin-btn small gold" id="addVidInlineBtn">+ Add Video Lecture</button>
+        </div>
+        <div class="admin-item-grid">
+          ${filtered.length ? filtered.map(item => {
+            const delKey = `vid-${item.subjectId}-${item.index}`;
+            const thumb = ytThumb(item.video.youtubeUrl);
+            return `
+              <article class="admin-item-card">
+                <div>
+                  ${thumb ? `<img class="admin-video-thumb" src="${escHtml(thumb)}" alt="" loading="lazy">` : ''}
+                  <div style="margin-top:8px"><span class="admin-pill">${escHtml(item.subjectName)} · ${escHtml(item.video.major || 'General')}</span></div>
+                  <h4>${escHtml(item.video.title)}</h4>
+                  <p>${escHtml(item.video.unit || 'Video Lesson')} ${item.video.channel ? '· ' + escHtml(item.video.channel) : ''}</p>
+                </div>
+                <div class="admin-row-actions">
+                  <button type="button" class="admin-btn small outline" data-watch-vid="${escHtml(item.subjectId)}:${item.index}">Watch</button>
+                  <button type="button" class="admin-btn small outline" data-edit-vid="${escHtml(item.subjectId)}:${item.index}">Edit</button>
+                  <button type="button" class="admin-btn small danger" data-del-vid="${escHtml(item.subjectId)}:${item.index}">${pendingDeleteKey === delKey ? 'Confirm?' : 'Delete'}</button>
+                </div>
+              </article>
+            `;
+          }).join('') : `<div class="admin-panel-card"><p>No video lectures match the current filter.</p></div>`}
+        </div>
+      `;
+
+      container.querySelector('#adminVidSubjectFilter').onchange = (e) => { filterSubject = e.target.value; renderCurrentAdminTab(); };
+      container.querySelector('#addVidInlineBtn').onclick = () => openVideoModal();
+      container.querySelectorAll('[data-watch-vid]').forEach(btn => {
+        btn.onclick = () => {
+          const [subId, idx] = btn.dataset.watchVid.split(':');
+          const sub = b.subjects.find(s => s.id === subId);
+          const vid = sub?.videos?.[Number(idx)];
+          if (vid) { closeAdminPanel(); b.openYoutubeVideo?.(vid); }
+        };
+      });
+      container.querySelectorAll('[data-edit-vid]').forEach(btn => {
+        btn.onclick = () => {
+          const [subId, idx] = btn.dataset.editVid.split(':');
+          openVideoModal(subId, Number(idx));
+        };
+      });
+      container.querySelectorAll('[data-del-vid]').forEach(btn => {
+        btn.onclick = () => {
+          const [subId, idx] = btn.dataset.delVid.split(':');
+          const delKey = `vid-${subId}-${idx}`;
+          if (pendingDeleteKey !== delKey) {
+            pendingDeleteKey = delKey;
+            renderCurrentAdminTab();
+            return;
+          }
+          const sub = b.subjects.find(s => s.id === subId);
+          if (sub && sub.videos) {
+            sub.videos.splice(Number(idx), 1);
+            pendingDeleteKey = null;
+            saveAdminSnapshot('Video lecture deleted.');
+            renderCurrentAdminTab();
+          }
+        };
+      });
+      return;
+    }
+
+    if (currentTab === 'syllabus') {
+      const sylEntries = [];
+      b.subjects.forEach(s => {
+        (s.resources || []).forEach((r, idx) => {
+          if (r.type === 'Syllabus') sylEntries.push({ source: 'subject', subjectName: s.name, subjectId: s.id, index: idx, resource: r });
+        });
+      });
+      b.additionalSyllabi.forEach((entry, idx) => {
+        sylEntries.push({ source: 'additional', subjectName: entry.subject, index: idx, resource: entry.resource });
+      });
+
+      const filtered = sylEntries.filter(item => {
+        if (q && ![item.subjectName, item.resource.title, item.resource.extracted?.course].join(' ').toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      container.innerHTML = `
+        <div class="admin-filter-bar">
+          <button type="button" class="admin-btn small gold" id="addSylInlineBtn">+ Add Course Syllabus</button>
+        </div>
+        <div class="admin-item-grid">
+          ${filtered.map(item => {
+            const units = item.resource.extracted?.units || [];
+            const key = `${item.source}:${item.subjectId || item.subjectName}:${item.index}`;
+            return `
+              <article class="admin-item-card">
+                <div>
+                  <span class="admin-pill">${escHtml(item.subjectName)} · ${units.length} units</span>
+                  <h4>${escHtml(item.resource.title)}</h4>
+                  <p>${escHtml(item.resource.extracted?.course || 'FYBA Course Syllabus')}</p>
+                </div>
+                <div class="admin-row-actions">
+                  <button type="button" class="admin-btn small outline" data-edit-syl="${escHtml(key)}">Edit Units</button>
+                  <button type="button" class="admin-btn small danger" data-del-syl="${escHtml(key)}">${pendingDeleteKey === key ? 'Confirm?' : 'Delete'}</button>
+                </div>
+              </article>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      container.querySelector('#addSylInlineBtn').onclick = () => openSyllabusModal();
+      container.querySelectorAll('[data-edit-syl]').forEach(btn => {
+        btn.onclick = () => openSyllabusModal(btn.dataset.editSyl);
+      });
+      container.querySelectorAll('[data-del-syl]').forEach(btn => {
+        btn.onclick = () => {
+          const key = btn.dataset.delSyl;
+          if (pendingDeleteKey !== key) {
+            pendingDeleteKey = key;
+            renderCurrentAdminTab();
+            return;
+          }
+          const [source, subKey, idxStr] = key.split(':');
+          const idx = Number(idxStr);
+          if (source === 'additional') {
+            b.additionalSyllabi.splice(idx, 1);
+          } else {
+            const sub = b.subjects.find(s => s.id === subKey);
+            if (sub?.resources) sub.resources.splice(idx, 1);
+          }
+          pendingDeleteKey = null;
+          saveAdminSnapshot('Course syllabus removed.');
+          renderCurrentAdminTab();
+        };
+      });
+      return;
+    }
+
+    if (currentTab === 'practice') {
+      const flashcardsList = [];
+      Object.entries(b.studyData || {}).forEach(([subId, majors]) => {
+        (majors || []).forEach((m, mIdx) => {
+          (m.units || []).forEach((u, uIdx) => {
+            (u.cards || []).forEach((card, cIdx) => {
+              flashcardsList.push({ subId, major: m.major, unit: u.unit, unitTitle: u.title, card, path: `${subId}:${mIdx}:${uIdx}:${cIdx}` });
+            });
+          });
+        });
+      });
+
+      const quizList = [];
+      Object.entries(b.quizBankData || {}).forEach(([subId, sections]) => {
+        (sections || []).forEach((sec, sIdx) => {
+          (sec.questions || []).forEach((item, qIdx) => {
+            quizList.push({ subId, major: sec.major, sectionTitle: sec.title, item, path: `${subId}:${sIdx}:${qIdx}` });
+          });
+        });
+      });
+
+      container.innerHTML = `
+        <div class="admin-filter-bar">
+          <button type="button" class="admin-btn small ${filterPracticeMode === 'flashcards' ? 'gold' : 'outline'}" id="modeFlashcardsBtn">Flashcard Decks (${flashcardsList.length})</button>
+          <button type="button" class="admin-btn small ${filterPracticeMode === 'quiz' ? 'gold' : 'outline'}" id="modeQuizBtn">MCQ Quiz Arena (${quizList.length})</button>
+          <button type="button" class="admin-btn small gold" id="addPracticeItemBtn">${filterPracticeMode === 'quiz' ? '+ Add MCQ Question' : '+ Add Flashcard'}</button>
+        </div>
+        ${filterPracticeMode === 'flashcards' ? `
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Subject / Unit</th><th>Question Prompt</th><th>Answer</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                ${flashcardsList.filter(f => !q || [f.subId, f.unitTitle, f.card.q, f.card.a].join(' ').toLowerCase().includes(q)).slice(0, 80).map(f => `
+                  <tr>
+                    <td><span class="admin-pill">${escHtml(f.subId.toUpperCase())} · M${f.major} U${escHtml(f.unit)}</span></td>
+                    <td><strong>${escHtml(f.card.q)}</strong></td>
+                    <td>${escHtml(f.card.a)}</td>
+                    <td>
+                      <div class="admin-row-actions">
+                        <button type="button" class="admin-btn small outline" data-edit-card="${escHtml(f.path)}">Edit</button>
+                        <button type="button" class="admin-btn small danger" data-del-card="${escHtml(f.path)}">${pendingDeleteKey === f.path ? 'Confirm?' : 'Delete'}</button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        ` : `
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Subject / Topic</th><th>Question</th><th>Correct Option</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                ${quizList.filter(item => !q || [item.subId, item.sectionTitle, item.item.q].join(' ').toLowerCase().includes(q)).slice(0, 80).map(item => `
+                  <tr>
+                    <td><span class="admin-pill">${escHtml(item.subId.toUpperCase())} · M${item.major}</span><br><small>${escHtml(item.sectionTitle)}</small></td>
+                    <td><strong>${escHtml(item.item.q)}</strong></td>
+                    <td><span class="admin-pill">${escHtml(item.item.options?.[item.item.correct] || '')}</span></td>
+                    <td>
+                      <div class="admin-row-actions">
+                        <button type="button" class="admin-btn small outline" data-edit-mcq="${escHtml(item.path)}">Edit</button>
+                        <button type="button" class="admin-btn small danger" data-del-mcq="${escHtml(item.path)}">${pendingDeleteKey === item.path ? 'Confirm?' : 'Delete'}</button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `}
+      `;
+
+      container.querySelector('#modeFlashcardsBtn').onclick = () => { filterPracticeMode = 'flashcards'; switchAdminTab('practice'); };
+      container.querySelector('#modeQuizBtn').onclick = () => { filterPracticeMode = 'quiz'; switchAdminTab('practice'); };
+      container.querySelector('#addPracticeItemBtn').onclick = () => filterPracticeMode === 'quiz' ? openQuizModal() : openFlashcardModal();
+
+      container.querySelectorAll('[data-edit-card]').forEach(btn => {
+        btn.onclick = () => openFlashcardModal(btn.dataset.editCard);
+      });
+      container.querySelectorAll('[data-del-card]').forEach(btn => {
+        btn.onclick = () => {
+          const p = btn.dataset.delCard;
+          if (pendingDeleteKey !== p) { pendingDeleteKey = p; renderCurrentAdminTab(); return; }
+          const [subId, mIdx, uIdx, cIdx] = p.split(':');
+          b.studyData[subId]?.[Number(mIdx)]?.units?.[Number(uIdx)]?.cards?.splice(Number(cIdx), 1);
+          pendingDeleteKey = null;
+          saveAdminSnapshot('Flashcard deleted.');
+          renderCurrentAdminTab();
+        };
+      });
+      container.querySelectorAll('[data-edit-mcq]').forEach(btn => {
+        btn.onclick = () => openQuizModal(btn.dataset.editMcq);
+      });
+      container.querySelectorAll('[data-del-mcq]').forEach(btn => {
+        btn.onclick = () => {
+          const p = btn.dataset.delMcq;
+          if (pendingDeleteKey !== p) { pendingDeleteKey = p; renderCurrentAdminTab(); return; }
+          const [subId, sIdx, qIdx] = p.split(':');
+          b.quizBankData[subId]?.[Number(sIdx)]?.questions?.splice(Number(qIdx), 1);
+          pendingDeleteKey = null;
+          saveAdminSnapshot('Quiz question deleted.');
+          renderCurrentAdminTab();
+        };
+      });
+      return;
+    }
+
+    if (currentTab === 'notices') {
+      const notices = getNoticesBridge()?.notices || [];
+      const notifs = getNotificationItems();
+      container.innerHTML = `
+        <section class="admin-panel-card">
+          <div class="admin-panel-card-head">
+            <div>
+              <span class="admin-kicker">HOME BULLETIN TICKER</span>
+              <h3>Rotating Home Notices (${notices.length})</h3>
+            </div>
+            <button type="button" class="admin-btn small gold" id="addNoticeBtn">+ Add Rotating Notice</button>
+          </div>
+          <div class="admin-item-grid">
+            ${notices.map((n, idx) => `
+              <article class="admin-item-card">
+                <div>
+                  <span class="admin-pill">${escHtml(n.category)}</span>
+                  <h4>${escHtml(n.title)}</h4>
+                  <p>${escHtml(n.message)}</p>
+                </div>
+                <div class="admin-row-actions">
+                  <button type="button" class="admin-btn small outline" data-edit-notice="${idx}">Edit</button>
+                  <button type="button" class="admin-btn small danger" data-del-notice="${idx}">${pendingDeleteKey === 'notice-' + idx ? 'Confirm?' : 'Delete'}</button>
+                </div>
+              </article>
+            `).join('')}
+          </div>
+        </section>
+
+        <section class="admin-panel-card">
+          <div class="admin-panel-card-head">
+            <div>
+              <span class="admin-kicker">BELL NOTIFICATION DRAWER</span>
+              <h3>Student Bell Notifications (${notifs.length})</h3>
+            </div>
+            <button type="button" class="admin-btn small gold" id="addNotifBtn">+ Add Bell Notification</button>
+          </div>
+          <div class="admin-item-grid">
+            ${notifs.map((n, idx) => `
+              <article class="admin-item-card">
+                <div>
+                  <span class="admin-pill">${escHtml(n.tag || 'UPDATE')}</span>
+                  <h4>${escHtml(n.title)}</h4>
+                  <p>${escHtml(n.message)}</p>
+                </div>
+                <div class="admin-row-actions">
+                  <button type="button" class="admin-btn small danger" data-del-notif="${idx}">Delete</button>
+                </div>
+              </article>
+            `).join('')}
+          </div>
+        </section>
+      `;
+
+      container.querySelector('#addNoticeBtn').onclick = () => openNoticeModal();
+      container.querySelector('#addNotifBtn').onclick = () => openNotificationModal();
+      container.querySelectorAll('[data-edit-notice]').forEach(btn => {
+        btn.onclick = () => openNoticeModal(Number(btn.dataset.editNotice));
+      });
+      container.querySelectorAll('[data-del-notice]').forEach(btn => {
+        btn.onclick = () => {
+          const idx = Number(btn.dataset.delNotice);
+          const key = 'notice-' + idx;
+          if (pendingDeleteKey !== key) { pendingDeleteKey = key; renderCurrentAdminTab(); return; }
+          notices.splice(idx, 1);
+          pendingDeleteKey = null;
+          saveAdminSnapshot('Notice removed.');
+          renderCurrentAdminTab();
+        };
+      });
+      container.querySelectorAll('[data-del-notif]').forEach(btn => {
+        btn.onclick = () => {
+          const list = getNotificationItems();
+          list.splice(Number(btn.dataset.delNotif), 1);
+          syncDomNotifications(list);
+          saveAdminSnapshot('Bell notification removed.');
+          renderCurrentAdminTab();
+        };
+      });
+      return;
+    }
+
+    if (currentTab === 'users') {
+      const read = (key, fallback) => { try { const value = JSON.parse(localStorage.getItem(key) || 'null'); return value == null ? fallback : value; } catch { return fallback; } };
+      const accounts = read('vishHubLocalAccountsV1', []);
+      const rows = (Array.isArray(accounts) ? accounts : []).map(account => {
+        const profile = read('vishHubProfileV1:' + account.uid, {});
+        const rawScores = read('vishHubQuizScoreboardV1:' + account.uid, []);
+        const scores = Array.isArray(rawScores) ? rawScores : [];
+        const focus = read('vishHubFocusV1:' + account.uid, { days: {} });
+        const focusSessions = Object.values(focus?.days || {}).reduce((sum, n) => sum + (Number(n) || 0), 0);
+        const average = scores.length ? Math.round(scores.reduce((sum, score) => sum + (Number(score.percent) || 0), 0) / scores.length) : null;
+        return { ...account, name: profile.name || account.displayName || 'Student', course: profile.course || 'FYBA · First Year', quizCount: scores.length, focusSessions, average };
+      }).filter(user => !q || [user.name, user.email, user.course, user.uid].join(' ').toLowerCase().includes(q));
+      const allAccounts = Array.isArray(accounts) ? accounts : [];
+      const allFocus = allAccounts.reduce((sum, user) => sum + Object.values(read('vishHubFocusV1:' + user.uid, { days: {} })?.days || {}).reduce((n, count) => n + (Number(count) || 0), 0), 0);
+      const allQuiz = allAccounts.reduce((sum, user) => { const scores = read('vishHubQuizScoreboardV1:' + user.uid, []); return sum + (Array.isArray(scores) ? scores.length : 0); }, 0);
+      container.innerHTML = `
+        <div class="admin-user-scope" role="note"><strong>Device-local data</strong><span>This directory includes accounts and learning activity saved in this browser only. It does not show users from other devices or Firebase Authentication.</span></div>
+        <div class="admin-kpi-grid"><article class="admin-kpi-card"><span>Accounts on this device</span><strong>${allAccounts.length}</strong><small>Locally observed sign-ins</small></article><article class="admin-kpi-card"><span>Quiz attempts</span><strong>${allQuiz}</strong><small>Saved local score records</small></article><article class="admin-kpi-card"><span>Focus sessions</span><strong>${allFocus}</strong><small>Across locally saved profiles</small></article></div>
+        <section class="admin-panel-card"><div class="admin-panel-card-head"><div><span class="admin-kicker">LOCAL PROFILE DIRECTORY</span><h3>Users &amp; Learning Activity</h3></div><span class="admin-pill">${rows.length} shown</span></div>
+        <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Student</th><th>Course</th><th>Last seen</th><th>Quiz attempts</th><th>Avg. score</th><th>Focus sessions</th><th>Controls</th></tr></thead><tbody>
+          ${rows.length ? rows.map(user => `<tr><td><strong>${escHtml(user.name)}</strong><br><small>${escHtml(user.email || user.uid)}</small></td><td>${escHtml(user.course)}</td><td>${user.lastSeenAt ? escHtml(new Date(user.lastSeenAt).toLocaleDateString()) : '—'}</td><td>${user.quizCount}</td><td>${user.average === null ? '—' : user.average + '%'}</td><td>${user.focusSessions}</td><td><div class="admin-row-actions"><button type="button" class="admin-btn small outline" data-reset-user="${escHtml(user.uid)}">Reset activity</button><button type="button" class="admin-btn small danger" data-remove-user="${escHtml(user.uid)}">${pendingDeleteKey === 'user-' + user.uid ? 'Confirm remove?' : 'Remove local data'}</button></div></td></tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:24px;color:#68778c">No local account records found. Accounts created on this device will appear here.</td></tr>'}
+        </tbody></table></div></section>`;
+      container.querySelectorAll('[data-reset-user]').forEach(button => button.onclick = () => {
+        const uid = button.dataset.resetUser;
+        if (!window.confirm('Reset quiz scores and focus sessions for this local profile?')) return;
+        try { localStorage.removeItem('vishHubQuizScoreboardV1:' + uid); localStorage.removeItem('vishHubFocusV1:' + uid); } catch {}
+        showAdminBanner('Local learning activity reset.'); renderCurrentAdminTab();
+      });
+      container.querySelectorAll('[data-remove-user]').forEach(button => button.onclick = () => {
+        const uid = button.dataset.removeUser, key = 'user-' + uid;
+        if (pendingDeleteKey !== key) { pendingDeleteKey = key; renderCurrentAdminTab(); return; }
+        try { localStorage.removeItem('vishHubProfileV1:' + uid); localStorage.removeItem('vishHubQuizScoreboardV1:' + uid); localStorage.removeItem('vishHubFocusV1:' + uid); localStorage.setItem('vishHubLocalAccountsV1', JSON.stringify(allAccounts.filter(user => user.uid !== uid))); } catch {}
+        pendingDeleteKey = null; showAdminBanner('Local profile data removed from this browser.'); renderCurrentAdminTab();
+      });
+      return;
+    }
+
+    if (currentTab === 'settings') {
+      let guestProfile = {};
+      let scores = [];
+      let focus = { goal: 3, days: {} };
+      try { guestProfile = JSON.parse(localStorage.getItem('vishHubGuestProfileV1') || '{}'); } catch {}
+      try { scores = JSON.parse(localStorage.getItem('vishHubQuizScoreboardV1:guest') || '[]'); } catch {}
+      try { focus = JSON.parse(localStorage.getItem('vishHubFocusV1:guest') || '{"goal":3,"days":{}}'); } catch {}
+      const totalFocusSessions = Object.values(focus.days || {}).reduce((a, b) => a + Number(b || 0), 0);
+
+      container.innerHTML = `
+        <div class="admin-kpi-grid">
+          <article class="admin-kpi-card"><span>Active Profile</span><strong>${escHtml(guestProfile.name || 'FYBA Scholar')}</strong><small>${escHtml(guestProfile.course || 'FYBA · First Year')}</small></article>
+          <article class="admin-kpi-card"><span>Focus Sessions</span><strong>${totalFocusSessions}</strong><small>Daily goal: ${focus.goal || 3} sessions</small></article>
+          <article class="admin-kpi-card"><span>Quiz Attempts</span><strong>${scores.length}</strong><small>Saved on this device</small></article>
+        </div>
+
+        <section class="admin-panel-card">
+          <div class="admin-panel-card-head">
+            <div>
+              <span class="admin-kicker">PORTAL CONFIGURATION BACKUP</span>
+              <h3>Export, Import or Reset Portal Data</h3>
+            </div>
+            <div class="admin-row-actions">
+              <button type="button" class="admin-btn small gold" id="exportJsonBtn">Download JSON Backup</button>
+              <label class="admin-btn small outline" style="cursor:pointer">
+                Import JSON
+                <input type="file" id="importJsonInput" accept="application/json" hidden>
+              </label>
+              <button type="button" class="admin-btn small danger" id="resetFactoryBtn">${pendingDeleteKey === 'factory-reset' ? 'Confirm Factory Reset?' : 'Reset to Factory Defaults'}</button>
+            </div>
+          </div>
+          <p style="margin:0;color:#5b6b82;font-size:12px">All changes made in the Admin Panel are persisted in browser storage (<code>vishHubAdminStateV1</code>) and immediately reflected across the Student Hub.</p>
+        </section>
+      `;
+
+      container.querySelector('#exportJsonBtn').onclick = exportAdminJson;
+      container.querySelector('#importJsonInput').onchange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(String(reader.result || '{}'));
+            localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(parsed));
+            applySavedAdminSnapshot();
+            showAdminBanner('Backup imported and applied to live portal.');
+            renderCurrentAdminTab();
+          } catch {
+            showAdminBanner('Invalid JSON backup file.');
+          }
+        };
+        reader.readAsText(file);
+      };
+      container.querySelector('#resetFactoryBtn').onclick = () => {
+        if (pendingDeleteKey !== 'factory-reset') {
+          pendingDeleteKey = 'factory-reset';
+          renderCurrentAdminTab();
+          return;
+        }
+        try {
+          localStorage.removeItem(ADMIN_STORAGE_KEY);
+          localStorage.removeItem(NOTIFICATIONS_STORAGE_KEY);
+        } catch {}
+        location.reload();
+      };
+    }
+  };
+
+  // Modal Builders
+  const openModal = (kicker, title, formHtml, onSubmit) => {
+    const scrim = document.getElementById('adminModalScrim');
+    document.getElementById('adminModalKicker').textContent = kicker;
+    document.getElementById('adminModalTitle').textContent = title;
+    const form = document.getElementById('adminModalForm');
+    form.innerHTML = formHtml + `
+      <div class="admin-modal-actions">
+        <button type="button" class="admin-btn outline" id="cancelAdminModalBtn">Cancel</button>
+        <button type="submit" class="admin-btn gold">Save &amp; Publish</button>
+      </div>
+    `;
+    form.querySelector('#cancelAdminModalBtn').onclick = closeModal;
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      onSubmit(new FormData(form));
+      closeModal();
+    };
+    scrim.hidden = false;
+  };
+
+  const closeModal = () => {
+    document.getElementById('adminModalScrim').hidden = true;
+  };
+
+  const openSubjectModal = (subjectId = '') => {
+    const b = getBridge();
+    const existing = b?.subjects.find(s => s.id === subjectId);
+    openModal('SUBJECT DIRECTORY', existing ? 'Edit Subject' : 'Add New Subject', `
+      <label class="admin-field">Subject Name<input name="name" value="${escHtml(existing?.name || '')}" required placeholder="e.g. Sociology"></label>
+      <label class="admin-field">Badge / Subtitle<input name="badge" value="${escHtml(existing?.badge || 'Study Resources')}" required></label>
+      <label class="admin-field">Description<textarea name="desc" required>${escHtml(existing?.desc || '')}</textarea></label>
+    `, (fd) => {
+      const name = String(fd.get('name') || '').trim();
+      const badge = String(fd.get('badge') || 'Study Resources').trim();
+      const desc = String(fd.get('desc') || '').trim();
+      if (!name) return;
+      if (existing) {
+        existing.name = name;
+        existing.badge = badge;
+        existing.desc = desc;
+      } else {
+        const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        b.subjects.push({ id, name, badge, tone: 'gold', desc, notes: [], videos: [], resources: [] });
+      }
+      saveAdminSnapshot(existing ? 'Subject updated.' : 'New subject added to Student Hub.');
+      renderCurrentAdminTab();
+    });
+  };
+
+  const openResourceModal = (subjectId = '', index = -1) => {
+    const b = getBridge();
+    const sub = b?.subjects.find(s => s.id === subjectId) || b?.subjects[0];
+    const existing = index >= 0 ? sub?.resources?.[index] : null;
+    openModal('STUDY RESOURCE EDITOR', existing ? 'Edit Study Resource' : 'Add Study PDF / Book', `
+      <label class="admin-field">Subject
+        <select name="subjectId">
+          ${b.subjects.map(s => `<option value="${escHtml(s.id)}" ${(existing ? s.id === subjectId : s.id === (filterSubject !== 'all' ? filterSubject : sub.id)) ? 'selected' : ''}>${escHtml(s.name)}</option>`).join('')}
+        </select>
+      </label>
+      <label class="admin-field">Resource Category
+        <select name="type">
+          ${['Textbooks', 'Books', 'Study Notes', 'Question Banks', 'Answer Keys'].map(t => `<option value="${t}" ${existing?.type === t ? 'selected' : ''}>${t}</option>`).join('')}
+        </select>
+      </label>
+      <label class="admin-field">Resource Title<input name="title" value="${escHtml(existing?.title || '')}" required placeholder="e.g. Economics Major 1 Study Notes"></label>
+      <label class="admin-field">Google Drive or PDF URL<input name="driveUrl" value="${escHtml(existing?.driveUrl || '')}" required placeholder="https://drive.google.com/file/d/.../view"></label>
+      <label class="admin-field">File Name<input name="fileName" value="${escHtml(existing?.fileName || 'Study_Resource.pdf')}" required></label>
+    `, (fd) => {
+      const targetSubId = String(fd.get('subjectId'));
+      const targetSub = b.subjects.find(s => s.id === targetSubId);
+      if (!targetSub) return;
+      targetSub.resources = targetSub.resources || [];
+      const item = {
+        type: String(fd.get('type')),
+        title: String(fd.get('title')).trim(),
+        driveUrl: normalizeDriveUrl(fd.get('driveUrl')),
+        fileName: String(fd.get('fileName')).trim() || 'Study_Resource.pdf'
+      };
+      if (existing && targetSubId === subjectId) {
+        targetSub.resources[index] = item;
+      } else {
+        if (existing && sub?.resources) sub.resources.splice(index, 1);
+        targetSub.resources.push(item);
+      }
+      saveAdminSnapshot(existing ? 'Study resource updated.' : 'Study resource added.');
+      renderCurrentAdminTab();
+    });
+  };
+
+  const openVideoModal = (subjectId = '', index = -1) => {
+    const b = getBridge();
+    const sub = b?.subjects.find(s => s.id === subjectId) || b?.subjects[0];
+    const existing = index >= 0 ? sub?.videos?.[index] : null;
+    openModal('VIDEO LECTURE EDITOR', existing ? 'Edit Video Lecture' : 'Add YouTube Video Lecture', `
+      <label class="admin-field">Subject
+        <select name="subjectId">
+          ${b.subjects.map(s => `<option value="${escHtml(s.id)}" ${s.id === (existing ? subjectId : (filterSubject !== 'all' ? filterSubject : 'economics')) ? 'selected' : ''}>${escHtml(s.name)}</option>`).join('')}
+        </select>
+      </label>
+      <label class="admin-field">Video Title<input name="title" value="${escHtml(existing?.title || '')}" required placeholder="e.g. 1.5 Fiscal Policy & Deficit Financing"></label>
+      <label class="admin-field">YouTube URL<input name="youtubeUrl" value="${escHtml(existing?.youtubeUrl || '')}" required placeholder="https://youtu.be/..."></label>
+      <label class="admin-field">Major / Paper Group<input name="major" value="${escHtml(existing?.major || 'Major 1')}" required></label>
+      <label class="admin-field">Unit Name<input name="unit" value="${escHtml(existing?.unit || 'Unit 1')}" required></label>
+      <label class="admin-field">Channel Name<input name="channel" value="${escHtml(existing?.channel || 'YouTube')}"></label>
+    `, (fd) => {
+      const targetSubId = String(fd.get('subjectId'));
+      const targetSub = b.subjects.find(s => s.id === targetSubId);
+      if (!targetSub) return;
+      targetSub.videos = targetSub.videos || [];
+      const item = {
+        title: String(fd.get('title')).trim(),
+        type: 'Video Lecture',
+        youtubeUrl: String(fd.get('youtubeUrl')).trim(),
+        major: String(fd.get('major')).trim(),
+        unit: String(fd.get('unit')).trim(),
+        channel: String(fd.get('channel')).trim() || 'YouTube'
+      };
+      if (existing && targetSubId === subjectId) {
+        targetSub.videos[index] = item;
+      } else {
+        if (existing && sub?.videos) sub.videos.splice(index, 1);
+        targetSub.videos.push(item);
+      }
+      saveAdminSnapshot(existing ? 'Video lecture updated.' : 'Video lecture published.');
+      renderCurrentAdminTab();
+    });
+  };
+
+  const openSyllabusModal = (key = '') => {
+    const b = getBridge();
+    let existing = null;
+    let defaultSub = 'Economics';
+    if (key) {
+      const [source, subKey, idxStr] = key.split(':');
+      const idx = Number(idxStr);
+      if (source === 'additional') {
+        existing = b.additionalSyllabi[idx]?.resource;
+        defaultSub = b.additionalSyllabi[idx]?.subject || defaultSub;
+      } else {
+        const sub = b.subjects.find(s => s.id === subKey);
+        existing = sub?.resources?.[idx];
+        defaultSub = sub?.name || defaultSub;
+      }
+    }
+    const unitsText = (existing?.extracted?.units || []).map(u => `${u.title} | ${(u.topics || []).join('; ')}`).join('\n');
+    openModal('COURSE SYLLABUS EDITOR', existing ? 'Edit Course Syllabus' : 'Add Course Syllabus', `
+      <label class="admin-field">Subject Name<input name="subject" value="${escHtml(defaultSub)}" required placeholder="e.g. Economics, Psychology, SEC, OE"></label>
+      <label class="admin-field">Paper / Syllabus Title<input name="title" value="${escHtml(existing?.title || '')}" required placeholder="e.g. Economics Major 1 · Indian Economy"></label>
+      <label class="admin-field">Course Header<input name="course" value="${escHtml(existing?.extracted?.course || 'FYBA Semester I · 2 credits · 30 hours')}" required></label>
+      <label class="admin-field">Units &amp; Topics (One unit per line: <code>Unit Title | Topic 1; Topic 2</code>)<textarea name="units" required placeholder="Introduction to Microeconomics | Meaning and scope; Demand and supply">${escHtml(unitsText)}</textarea></label>
+      <label class="admin-field">Assessment Notes<input name="assessment" value="${escHtml(existing?.extracted?.assessment || '30 marks internal + 70 marks semester examination.')}"></label>
+    `, (fd) => {
+      const subject = String(fd.get('subject')).trim();
+      const title = String(fd.get('title')).trim();
+      const course = String(fd.get('course')).trim();
+      const assessment = String(fd.get('assessment')).trim();
+      const units = String(fd.get('units') || '').split('\n').map(line => line.trim()).filter(Boolean).map(line => {
+        const [uTitle, topicsRaw] = line.split('|');
+        return {
+          title: (uTitle || 'Unit').trim(),
+          topics: (topicsRaw || '').split(';').map(t => t.trim()).filter(Boolean)
+        };
+      });
+      const resourceObj = {
+        type: 'Syllabus',
+        title,
+        fileName: title + '.pdf',
+        extracted: { course, units, assessment }
+      };
+      if (existing) {
+        existing.title = title;
+        existing.extracted = { ...(existing.extracted || {}), course, units, assessment };
+      } else {
+        b.additionalSyllabi.unshift({ subject, resource: resourceObj });
+      }
+      saveAdminSnapshot(existing ? 'Syllabus updated.' : 'New course syllabus published.');
+      renderCurrentAdminTab();
+    });
+  };
+
+  const openFlashcardModal = (path = '') => {
+    const b = getBridge();
+    let existing = null;
+    let subId = 'psychology', major = 1, unit = '1', unitTitle = 'CORE CONCEPTS';
+    if (path) {
+      const [sId, mIdx, uIdx, cIdx] = path.split(':');
+      subId = sId;
+      const mObj = b.studyData[sId]?.[Number(mIdx)];
+      const uObj = mObj?.units?.[Number(uIdx)];
+      major = mObj?.major || 1;
+      unit = uObj?.unit || '1';
+      unitTitle = uObj?.title || 'UNIT';
+      existing = uObj?.cards?.[Number(cIdx)];
+    }
+    openModal('FLASHCARD EDITOR', existing ? 'Edit Flashcard' : 'Add Recall Flashcard', `
+      <label class="admin-field">Subject ID
+        <select name="subId">
+          ${b.subjects.map(s => `<option value="${escHtml(s.id)}" ${s.id === subId ? 'selected' : ''}>${escHtml(s.name)}</option>`).join('')}
+        </select>
+      </label>
+      <label class="admin-field">Major Number<input type="number" name="major" min="1" max="4" value="${major}" required></label>
+      <label class="admin-field">Unit Number<input name="unit" value="${escHtml(unit)}" required></label>
+      <label class="admin-field">Unit Title<input name="unitTitle" value="${escHtml(unitTitle)}" required></label>
+      <label class="admin-field">Question Prompt<textarea name="q" required>${escHtml(existing?.q || '')}</textarea></label>
+      <label class="admin-field">Verified Answer<textarea name="a" required>${escHtml(existing?.a || '')}</textarea></label>
+    `, (fd) => {
+      const q = String(fd.get('q')).trim();
+      const a = String(fd.get('a')).trim();
+      if (existing) {
+        existing.q = q;
+        existing.a = a;
+      } else {
+        const targetSub = String(fd.get('subId'));
+        const targetMajor = Number(fd.get('major')) || 1;
+        const targetUnit = String(fd.get('unit')).trim() || '1';
+        const targetUnitTitle = String(fd.get('unitTitle')).trim() || 'Study Unit';
+        b.studyData[targetSub] = b.studyData[targetSub] || [];
+        let mGroup = b.studyData[targetSub].find(m => Number(m.major) === targetMajor);
+        if (!mGroup) { mGroup = { major: targetMajor, units: [] }; b.studyData[targetSub].push(mGroup); }
+        let uGroup = mGroup.units.find(u => String(u.unit) === targetUnit);
+        if (!uGroup) { uGroup = { unit: targetUnit, title: targetUnitTitle, cards: [] }; mGroup.units.push(uGroup); }
+        uGroup.cards.unshift({ q, a });
+      }
+      saveAdminSnapshot(existing ? 'Flashcard updated.' : 'Flashcard added to deck.');
+      renderCurrentAdminTab();
+    });
+  };
+
+  const openQuizModal = (path = '') => {
+    const b = getBridge();
+    let existing = null;
+    let subId = 'psychology', major = 1, secTitle = 'Unit 1 Practice Quiz';
+    if (path) {
+      const [sId, sIdx, qIdx] = path.split(':');
+      subId = sId;
+      const sec = b.quizBankData[sId]?.[Number(sIdx)];
+      major = sec?.major || 1;
+      secTitle = sec?.title || secTitle;
+      existing = sec?.questions?.[Number(qIdx)];
+    }
+    openModal('QUIZ ARENA MCQ EDITOR', existing ? 'Edit MCQ Question' : 'Add MCQ Question', `
+      <label class="admin-field">Subject
+        <select name="subId">
+          ${b.subjects.map(s => `<option value="${escHtml(s.id)}" ${s.id === subId ? 'selected' : ''}>${escHtml(s.name)}</option>`).join('')}
+        </select>
+      </label>
+      <label class="admin-field">Major Number<input type="number" name="major" min="1" max="4" value="${major}" required></label>
+      <label class="admin-field">Quiz Topic Title<input name="title" value="${escHtml(secTitle)}" required></label>
+      <label class="admin-field">Question Stem<textarea name="q" required>${escHtml(existing?.q || '')}</textarea></label>
+      <label class="admin-field">Option A<input name="opt0" value="${escHtml(existing?.options?.[0] || '')}" required></label>
+      <label class="admin-field">Option B<input name="opt1" value="${escHtml(existing?.options?.[1] || '')}" required></label>
+      <label class="admin-field">Option C<input name="opt2" value="${escHtml(existing?.options?.[2] || '')}" required></label>
+      <label class="admin-field">Option D<input name="opt3" value="${escHtml(existing?.options?.[3] || '')}" required></label>
+      <label class="admin-field">Correct Option
+        <select name="correct">
+          ${['Option A', 'Option B', 'Option C', 'Option D'].map((label, idx) => `<option value="${idx}" ${Number(existing?.correct || 0) === idx ? 'selected' : ''}>${label}</option>`).join('')}
+        </select>
+      </label>
+    `, (fd) => {
+      const q = String(fd.get('q')).trim();
+      const options = [0, 1, 2, 3].map(i => String(fd.get('opt' + i)).trim());
+      const correct = Number(fd.get('correct')) || 0;
+      if (existing) {
+        existing.q = q;
+        existing.options = options;
+        existing.correct = correct;
+      } else {
+        const targetSub = String(fd.get('subId'));
+        const targetMajor = Number(fd.get('major')) || 1;
+        const targetTitle = String(fd.get('title')).trim() || 'Practice Quiz';
+        b.quizBankData[targetSub] = b.quizBankData[targetSub] || [];
+        let sec = b.quizBankData[targetSub].find(s => s.major === targetMajor && s.title === targetTitle);
+        if (!sec) { sec = { subject: targetSub, major: targetMajor, title: targetTitle, questions: [] }; b.quizBankData[targetSub].push(sec); }
+        sec.questions.unshift({ q, options, correct });
+      }
+      saveAdminSnapshot(existing ? 'Quiz MCQ updated.' : 'Quiz MCQ added to Quiz Arena.');
+      renderCurrentAdminTab();
+    });
+  };
+
+  const openNoticeModal = (index = -1) => {
+    const notices = getNoticesBridge()?.notices || [];
+    const existing = index >= 0 ? notices[index] : null;
+    openModal('BULLETIN NOTICE EDITOR', existing ? 'Edit Notice' : 'Publish Rotating Notice', `
+      <label class="admin-field">Category Badge<input name="category" value="${escHtml(existing?.category || 'EXAM UPDATE')}" required></label>
+      <label class="admin-field">Headline<input name="title" value="${escHtml(existing?.title || '')}" required></label>
+      <label class="admin-field">Full Notice Message<textarea name="message" required>${escHtml(existing?.message || '')}</textarea></label>
+      <label class="admin-field">Action Button Label<input name="action" value="${escHtml(existing?.action || 'Open link')}" required></label>
+      <label class="admin-field">Action URL (optional)<input name="url" value="${escHtml(existing?.url || 'https://mywadia.edupluscampus.com/Examination')}"></label>
+    `, (fd) => {
+      const item = {
+        category: String(fd.get('category')).trim().toUpperCase(),
+        title: String(fd.get('title')).trim(),
+        message: String(fd.get('message')).trim(),
+        action: String(fd.get('action')).trim() || 'Open',
+        url: String(fd.get('url')).trim()
+      };
+      if (existing) notices[index] = item;
+      else notices.unshift(item);
+      saveAdminSnapshot(existing ? 'Notice updated.' : 'New rotating notice published.');
+      renderCurrentAdminTab();
+    });
+  };
+
+  const openNotificationModal = () => {
+    openModal('BELL NOTIFICATION EDITOR', 'Add Bell Notification', `
+      <label class="admin-field">Category Tag<input name="tag" value="ACADEMIC ALERT" required></label>
+      <label class="admin-field">Notification Title<input name="title" required placeholder="e.g. Internal Viva Schedule Posted"></label>
+      <label class="admin-field">Notification Summary<textarea name="message" required placeholder="Check the SEC & OE desks for updated project guidelines."></textarea></label>
+    `, (fd) => {
+      const list = getNotificationItems();
+      list.unshift({
+        id: 'notif-' + Date.now(),
+        tag: String(fd.get('tag')).trim().toUpperCase(),
+        title: String(fd.get('title')).trim(),
+        message: String(fd.get('message')).trim(),
+        target: 'subjects'
+      });
+      syncDomNotifications(list);
+      try { localStorage.setItem('vishHubNotificationsRead', 'false'); } catch {}
+      const bellDot = document.querySelector('#bell i');
+      if (bellDot) bellDot.hidden = false;
+      saveAdminSnapshot('Bell notification pushed to Student Hub.');
+      renderCurrentAdminTab();
+    });
+  };
+
+  const exportAdminJson = () => {
+    saveAdminSnapshot();
+    const raw = localStorage.getItem(ADMIN_STORAGE_KEY) || '{}';
+    const blob = new Blob([raw], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'vish-hub-admin-backup.json';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    showAdminBanner('JSON backup downloaded.');
+  };
+
+  // Wire Event Listeners
+  window.addEventListener('DOMContentLoaded', () => {
+    applySavedAdminSnapshot();
+
+    document.querySelectorAll('[data-open-admin]').forEach(btn => {
+      btn.addEventListener('click', () => openAdminPanel(btn.dataset.openAdmin || 'overview'));
+    });
+    document.querySelectorAll('#adminNavTabs [data-admin-tab]').forEach(btn => {
+      btn.addEventListener('click', () => switchAdminTab(btn.dataset.adminTab));
+    });
+    document.getElementById('closeAdminPanelBtn')?.addEventListener('click', closeAdminPanel);
+    document.getElementById('adminExitMobileBtn')?.addEventListener('click', closeAdminPanel);
+    document.getElementById('adminPreviewHubBtn')?.addEventListener('click', closeAdminPanel);
+    document.getElementById('closeAdminModalBtn')?.addEventListener('click', closeModal);
+    document.getElementById('adminModalScrim')?.addEventListener('click', (e) => {
+      if (e.target.id === 'adminModalScrim') closeModal();
+    });
+    document.getElementById('adminGlobalSearch')?.addEventListener('input', () => renderCurrentAdminTab());
+    if (isAdminRoute() && window.vishHubAdminAuthorized) openAdminPanel('overview', true);
+    window.addEventListener('vishhub-admin-authorized', () => { if (isAdminRoute()) openAdminPanel('overview', true); });
+    window.addEventListener('popstate', () => {
+      if (isAdminRoute() && window.vishHubAdminAuthorized) openAdminPanel('overview', true);
+      else if (!document.getElementById('adminPanelPage')?.hidden) closeAdminPanel();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modalScrim = document.getElementById('adminModalScrim');
+        const page = document.getElementById('adminPanelPage');
+        if (modalScrim && !modalScrim.hidden) closeModal();
+        else if (page && !page.hidden) closeAdminPanel();
+      }
+    });
+  });
+})();
+</script>
+
+<script id="vishhub-firebase-bootstrap" type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
+  import { getAnalytics, isSupported as isAnalyticsSupported } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js';
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
+  const firebaseConfig={apiKey:'AIzaSyCOYOY7bxb7Xj1wXR7t5mo4HWP6dh6ytrM',authDomain:'vish-hub.firebaseapp.com',projectId:'vish-hub',storageBucket:'vish-hub.firebasestorage.app',messagingSenderId:'287693072826',appId:'1:287693072826:web:4870d52e1eb074c1395583',measurementId:'G-E23PGJCKZT'};
+  const ADMIN_EMAIL='shrivishaljadhav@gmail.com'; const app=initializeApp(firebaseConfig); const auth=getAuth(app);
+  window.vishHubFirebaseApp=app; window.vishHubFirebaseAuth=auth; window.vishHubAdminAuthorized=false;
+  try{if(await isAnalyticsSupported()){window.vishHubAnalytics=getAnalytics(app);document.documentElement.dataset.firebaseAnalytics='ready'}}catch(error){console.warn('Firebase Analytics is unavailable in this browser.',error);document.documentElement.dataset.firebaseAnalytics='unavailable'}
+  const adminPath=()=>location.pathname.replace(/\/+$/,'')==='/vishadmin'; const gate=document.getElementById('adminAuthGate'); const panel=document.getElementById('adminPanelPage'); const form=document.getElementById('adminAuthForm'); const status=document.getElementById('adminAuthStatus'); const setStatus=(message)=>{if(status)status.textContent=message};
+  const authorize=async(user)=>{
+    if(!user||user.email?.toLowerCase()!==ADMIN_EMAIL){window.vishHubAdminAuthorized=false;if(panel)panel.hidden=true;if(gate&&adminPath())gate.hidden=false;setStatus('This Firebase account is not authorized for admin access.');if(user)await signOut(auth);return}
+    window.vishHubAdminAuthorized=true;if(gate)gate.hidden=true;setStatus('');window.dispatchEvent(new Event('vishhub-admin-authorized'))
+  };
+  if(adminPath()){if(panel)panel.hidden=true;if(gate)gate.hidden=false;form?.addEventListener('submit',async(event)=>{event.preventDefault();const submit=document.getElementById('adminAuthSubmit');if(submit)submit.disabled=true;setStatus('Signing in…');try{const email=document.getElementById('adminAuthEmail')?.value?.trim().toLowerCase()||'';const password=document.getElementById('adminAuthPassword')?.value||'';if(email!==ADMIN_EMAIL)throw new Error('Use the authorized admin email address.');const credential=await signInWithEmailAndPassword(auth,email,password);await authorize(credential.user);if(window.vishHubAdminAuthorized)form.reset()}catch(error){setStatus(error?.code==='auth/invalid-credential'||error?.code==='auth/wrong-password'?'Email or password is incorrect.':error?.message||'Sign-in failed. Please try again.')}finally{if(submit)submit.disabled=false}});onAuthStateChanged(auth,(user)=>{if(user)authorize(user);else{window.vishHubAdminAuthorized=false;if(panel)panel.hidden=true;if(gate)gate.hidden=false}});document.getElementById('adminSignOutBtn')?.addEventListener('click',()=>signOut(auth))}
+</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
