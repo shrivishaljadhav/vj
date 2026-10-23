@@ -1,3 +1,10 @@
 {
-  "rewrites": []
+  "redirects": [
+    { "source": "/auth/action", "destination": "/verify", "permanent": true },
+    { "source": "/auth/action/", "destination": "/verify", "permanent": true },
+    { "source": "/verify/", "destination": "/verify", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/verify", "destination": "/index.html" }
+  ]
 }
